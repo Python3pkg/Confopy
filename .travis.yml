@@ -7,7 +7,8 @@ python:
   - "3.7-dev" # 3.7 development branch
 
 install: 
-  - pip install -r requirements.txt 
+  # - pip install -r requirements.txt 
+  - ". install.sh"
 
 script: 
   - "python setup.py install"
