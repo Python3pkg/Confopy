@@ -13,5 +13,5 @@ def getChildElementsByTagName(node, tagName):
     return elems
 
 def escape(string):
-    return (SU.escape(string)).replace(u"\"", u"&quot;")
+    return (SU.escape(string)).replace("\"", "&quot;")
 

@@ -40,17 +40,17 @@ def convert_to_utf8():
 
 def fix_strings():
     replacements = {
-          1       : [u"ISO-8859-1", u"utf-8"]
-        , 293648  : [u"Pl.1.Pres.Ind", u"1.Pl.Pres.Ind"]
-        , 543756  : [u"Pl.3.Pres.Ind", u"3.Pl.Pres.Ind"]
-        , 1846632 : [u"Pl.3.Pres.Ind", u"3.Pl.Pres.Ind"]
-        , 2634040 : [u"Pl.3.Pres.Ind", u"3.Pl.Pres.Ind"]
+          1       : ["ISO-8859-1", "utf-8"]
+        , 293648  : ["Pl.1.Pres.Ind", "1.Pl.Pres.Ind"]
+        , 543756  : ["Pl.3.Pres.Ind", "3.Pl.Pres.Ind"]
+        , 1846632 : ["Pl.3.Pres.Ind", "3.Pl.Pres.Ind"]
+        , 2634040 : ["Pl.3.Pres.Ind", "3.Pl.Pres.Ind"]
     }
     linenr = 1
     with codecs.open(TIGER_FILE_UTF8_PATCHED, "w", TARGET_ENC) as outfile:
         with codecs.open(TIGER_FILE_UTF8, "r", TARGET_ENC) as infile:
             for line in infile:
-                line = unicode(line).replace(u"\r", u"") # Replace Window's carriage returns
+                line = str(line).replace("\r", "") # Replace Window's carriage returns
                 replacement = replacements.get(linenr, [])
                 if replacement != []:
                     line = line.replace(replacement[0], replacement[1], 1)

@@ -9,7 +9,7 @@ __version__ = "0.1.0"
 import sys
 from   optparse import OptionParser
 
-from pdfminer_wrapper import *
+from .pdfminer_wrapper import *
 
 def main(options, args):
     for fname in args:
@@ -21,7 +21,7 @@ def main(options, args):
             result = w.pdf2html(fname)
         elif options.text:
             result = w.pdf2txt(fname)
-        print result.strip()
+        print(result.strip())
 
 
 if __name__ == "__main__":

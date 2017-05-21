@@ -17,8 +17,8 @@ def validate(files):
     Return:
         A string message indicating the successful validation or listing all errors.
     """
-    xsd_path = u"%s/confopy_document.xsd" % op.dirname(op.realpath(__file__))
-    output = u""
+    xsd_path = "%s/confopy_document.xsd" % op.dirname(op.realpath(__file__))
+    output = ""
     for f in files:
         xsd_doc = etree.parse(xsd_path)
         xml_schema = etree.XMLSchema(xsd_doc)

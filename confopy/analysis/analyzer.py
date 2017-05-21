@@ -6,12 +6,13 @@ Description:
     Analyzer class bundling all metrics, rules and reports.
 '''
 
-from localizable import Localizable
-from corpus import Corpus, NO_WORDS
-from metric import Metric
-from rule import Rule
-from report import Report
+from .localizable import Localizable
+from .corpus import Corpus, NO_WORDS
+from .metric import Metric
+from .rule import Rule
+from .report import Report
 import confopy.config as C
+from functools import reduce
 
 
 class Analyzer(object):
@@ -19,7 +20,7 @@ class Analyzer(object):
     """
 
     _instances = dict()
-    _PAD = u"  "
+    _PAD = "  "
 
     @staticmethod
     def instance(lang=C.DEFAULT_LANG):
@@ -116,10 +117,10 @@ class Analyzer(object):
         Return:
             List of unique unicode strings (ISO 639-1 language codes).
         """
-        langs = [v.language for v in dictionary.values()]
+        langs = [v.language for v in list(dictionary.values())]
         return sorted(set(langs))
 
-    def reportlist(self, lang=u""):
+    def reportlist(self, lang=""):
         """Returns a pretty formatted list of reports as a unicode string.
         Args:
             lang: List only reports of this language. Optional.
@@ -129,12 +130,12 @@ class Analyzer(object):
             A unicode string.
         """
         if len(self._reports) == 0:
-            return u"No reports known to Confopy!"
+            return "No reports known to Confopy!"
 
         buf = list()
         langs = list()
         max_ID_len = 0
-        if lang != u"":
+        if lang != "":
             langs.append(lang)
             report_IDs = sorted(self.reports().keys())
             max_ID_len = max([len(rID) for rID in report_IDs])
@@ -144,76 +145,76 @@ class Analyzer(object):
         pad_width = max_ID_len + 2 * len(Analyzer._PAD)
 
         for l in langs:
-            buf.append(u'Reports for language "%s":' % (l, ))
+            buf.append('Reports for language "%s":' % (l, ))
             report_IDs = sorted(self.reports().keys())
             for report_ID in report_IDs:
                 report = self._reports.get(report_ID)
-                line = u"%s%s%s" % (Analyzer._PAD, report_ID.ljust(pad_width), report.brief)
+                line = "%s%s%s" % (Analyzer._PAD, report_ID.ljust(pad_width), report.brief)
                 buf.append(line)
-                line = u"%s%s%s" % (Analyzer._PAD, Analyzer._PAD, report.description)
+                line = "%s%s%s" % (Analyzer._PAD, Analyzer._PAD, report.description)
                 buf.append(line)
-                if report.description is not u"":
-                    buf.append(u"")
+                if report.description is not "":
+                    buf.append("")
 
-        return u"\n".join(buf)
+        return "\n".join(buf)
 
-    def metriclist(self, lang=u""):
+    def metriclist(self, lang=""):
         """Returns a pretty formatted list of metrics as a unicode string.
         Return:
             A unicode string.
         """
         buf = list()
-        buf.append(u"Metrics for language \"" + lang + u"\":")
+        buf.append("Metrics for language \"" + lang + "\":")
         keys = sorted(self._metrics.keys())
         pad_width = reduce(max, [len(k) for k in keys], 0) + 2 * len(Analyzer._PAD)
         for k in keys:
             metric = self._metrics[k]
-            buf.append(u"%s%s%s" % (Analyzer._PAD, k.ljust(pad_width), metric.brief))
-            buf.append(u"%s%s%s" % (Analyzer._PAD, Analyzer._PAD, metric.description))
-            if self._metrics[k].description is not u"":
-                buf.append(u"")
-        return u"\n".join(buf)
+            buf.append("%s%s%s" % (Analyzer._PAD, k.ljust(pad_width), metric.brief))
+            buf.append("%s%s%s" % (Analyzer._PAD, Analyzer._PAD, metric.description))
+            if self._metrics[k].description is not "":
+                buf.append("")
+        return "\n".join(buf)
 
-    def rulelist(self, lang=u""):
+    def rulelist(self, lang=""):
         """Returns a pretty formatted list of rules as a unicode string.
         Return:
             A unicode string.
         """
         buf = []
-        buf.append(u"Rules for language \"" + lang + u"\":")
+        buf.append("Rules for language \"" + lang + "\":")
         keys = sorted(self._rules.keys())
         pad_width = reduce(max, [len(k) for k in keys], 0) + 2 * len(Analyzer._PAD)
         for k in keys:
             rule = self._rules[k]
-            buf.append(u"%s%s%s" % (Analyzer._PAD, k.ljust(pad_width), rule.brief))
-            buf.append(u"%s%s%s" % (Analyzer._PAD, Analyzer._PAD, rule.description))
-            if rule.description is not u"":
-                buf.append(u"")
-        return u"\n".join(buf)
+            buf.append("%s%s%s" % (Analyzer._PAD, k.ljust(pad_width), rule.brief))
+            buf.append("%s%s%s" % (Analyzer._PAD, Analyzer._PAD, rule.description))
+            if rule.description is not "":
+                buf.append("")
+        return "\n".join(buf)
 
 
 if __name__ == '__main__':
-    print u"Test for %s" % __file__
+    print("Test for %s" % __file__)
 
     analyzer = Analyzer.instance()
 
-    analyzer.register(Report(u"test-en" , u"en", u"Easy to parse report using all metrics."))
-    analyzer.register(Report(u"test-aa" , u"aa"))
-    analyzer.register(Report(u"test-de1", u"de", u"Wortlängenreport"))
-    analyzer.register(Report(u"test-de2", u"de"))
-    analyzer.register(Report(u"test-fr1", u"fr"))
-    analyzer.register(Report(u"test-fr2", u"fr"))
-    analyzer.register(Report(u"test-fr3", u"fr"))
+    analyzer.register(Report("test-en" , "en", "Easy to parse report using all metrics."))
+    analyzer.register(Report("test-aa" , "aa"))
+    analyzer.register(Report("test-de1", "de", "Wortlängenreport"))
+    analyzer.register(Report("test-de2", "de"))
+    analyzer.register(Report("test-fr1", "fr"))
+    analyzer.register(Report("test-fr2", "fr"))
+    analyzer.register(Report("test-fr3", "fr"))
     assert len(analyzer.reports()) == 2
 
-    print u"  Testing report list..."
-    expected_reportlist = u"""\
+    print("  Testing report list...")
+    expected_reportlist = """\
 Reports for language "de":
   test-de1    Wortlängenreport
     \
 \n  test-de2    \
 \n    """
-    assert analyzer.reportlist(u"de") == expected_reportlist
+    assert analyzer.reportlist("de") == expected_reportlist
     assert analyzer.reportlist() == expected_reportlist
 
-    print u"Passed all tests!"
+    print("Passed all tests!")

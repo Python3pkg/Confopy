@@ -30,8 +30,8 @@ TEST_FILE = TEST_LOC + "gjk_ozscheyg.pdf"
 #TEST_FILE = TEST_LOC + "spanner-osdi2012.pdf"
 TEST_FILE = TEST_LOC + "SEUH_Kompetenzerwerb.pdf"
 
-PDF_SUFFIX = u".pdf"
-XML_SUFFIX = u".xml"
+PDF_SUFFIX = ".pdf"
+XML_SUFFIX = ".xml"
 
 def test(args):
     """Construction site."""
@@ -53,7 +53,7 @@ def test(args):
     #if ind < len(pages):
     #    pages[ind]._print()
 
-def pdf2xml(args, output=u""):
+def pdf2xml(args, output=""):
     dc = DocumentConverter()
     doc = None
     if len(args.files) == 1:
@@ -65,7 +65,7 @@ def pdf2xml(args, output=u""):
         output = dc.to_XML(doc, pretty=True)
     return output
 
-def report(args, output=u""):
+def report(args, output=""):
     # Convert files to Documents
     dc = DocumentConverter()
     docs = list()
@@ -92,7 +92,7 @@ def report(args, output=u""):
 """ MAIN
 """
 def main(args):
-    output = u""
+    output = ""
 
     if args.reportlist:
         load_language(args.language, True)
@@ -123,10 +123,10 @@ def main(args):
     if args.outfile is not "":
         with open(args.outfile, "w") as f:
             f.write(output.encode("utf8"))
-            f.write(u"\n".encode("utf8"))
+            f.write("\n".encode("utf8"))
     else:
         sys.stdout.write(output.encode("utf8"))
-        sys.stdout.write(u"\n".encode("utf8"))
+        sys.stdout.write("\n".encode("utf8"))
 
 
 if __name__ == "__main__":

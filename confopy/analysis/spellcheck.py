@@ -10,8 +10,8 @@ import enchant as e
 import confopy.config as C
 
 ENCHANT_LANG_MAP = {
-      u"de": u"de_DE"
-    , u"en": u"en"
+      "de": "de_DE"
+    , "en": "en"
 }
 
 def list_languages():
@@ -33,7 +33,7 @@ class SpellChecker(object):
             lang: Language code, e.g. u"de" or u"en", for the spellchecker.
         """
         super(SpellChecker, self).__init__()
-        pyenchant_lang = ENCHANT_LANG_MAP.get(lang, u"de_DE")
+        pyenchant_lang = ENCHANT_LANG_MAP.get(lang, "de_DE")
         self._enchant_dict = e.Dict(pyenchant_lang)
 
     def check(self, word):
@@ -50,17 +50,17 @@ class SpellChecker(object):
 
 
 if __name__ == '__main__':
-    print u"Test for %s" % __file__
+    print("Test for %s" % __file__)
 
-    print u"  Testing SpellChecker..."
-    checker = SpellChecker(u"de")
-    word_de = u"Hallo"
-    word_en = u"Hello"
+    print("  Testing SpellChecker...")
+    checker = SpellChecker("de")
+    word_de = "Hallo"
+    word_en = "Hello"
     assert checker.check(word_de)
     assert not checker.check(word_en)
     assert len(checker.suggest(word_en)) == 6
 
-    print u"  Testing list_languages..."
-    assert list_languages() == [u"de", u"en"]
+    print("  Testing list_languages...")
+    assert list_languages() == ["de", "en"]
 
-    print u"Passed all tests!"
+    print("Passed all tests!")

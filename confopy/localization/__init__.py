@@ -13,14 +13,14 @@ def load_language(lang=C.DEFAULT_LANG, lightweight=False):
                      and NO corpora.
                      False: load everything (might take some time)
     """
-    if lang == u"de":
+    if lang == "de":
         #from confopy.localization.de import *
         if not lightweight:
             import confopy.localization.de.corpus
         import confopy.localization.de.metrics
         import confopy.localization.de.rules
         import confopy.localization.de.reports
-    elif lang == u"en":
+    elif lang == "en":
         pass
 
 #from confopy.localization.metrics import *

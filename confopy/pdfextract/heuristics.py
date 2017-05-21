@@ -19,8 +19,8 @@ class HeuristicRegExes(object):
     PAGE_NR = r"\d+"
     SECTION_NR = r"(\.\s?)*(\d\.?)+"
 
-    _WHITE = u"[\\s\xa0]"
-    _NOT_WHITE = u"[^\\s\xa0]"
+    _WHITE = "[\\s\xa0]"
+    _NOT_WHITE = "[^\\s\xa0]"
 
     _FLOAT_NR       = _WHITE + r"*" + SECTION_NR + r":?"
     FIGURE_CAP      = r"((Abbildung)|(Abb\.?)|(Figur)|(Fig\.?)|(Grafik)|(Bild))" + _FLOAT_NR
@@ -36,7 +36,7 @@ class HeuristicRegExes(object):
         2. No whitespace after the number
         3. Number is in emph (emphasis of the textbox)
     """
-    LATEX_FOOTNOTE = SECTION_NR + u"[^\\s\xa0\\d\\.]+"
+    LATEX_FOOTNOTE = SECTION_NR + "[^\\s\xa0\\d\\.]+"
 
     ERROR_SECTION_RELATION = -42
 
@@ -65,8 +65,8 @@ class HeuristicRegExes(object):
         if match_a and match_b:
             number_a = a[:match_a.end()]
             number_b = b[:match_b.end()]
-            split_a = filter(lambda s: s.strip() is not u"", number_a.split(u"."))
-            split_b = filter(lambda s: s.strip() is not u"", number_b.split(u"."))
+            split_a = [s for s in number_a.split(".") if s.strip() is not ""]
+            split_b = [s for s in number_b.split(".") if s.strip() is not ""]
             return len(split_b) - len(split_a)
         return HeuristicRegExes.ERROR_SECTION_RELATION
 
@@ -156,18 +156,18 @@ class HeuristicManager(object):
     def _build_document_hierarchy(self, dom_pages, hints):
         root = Document()
         node = root # current node to add children to
-        last_title = u""
+        last_title = ""
         accu_heading_nr = None
 
         for p in dom_pages:
-            pagenr = unicode(p.ID)
+            pagenr = str(p.ID)
             for tb in p.textboxes:
                 tb_kind = hints.get(tb, TextBoxType.NONE)
                 #print str(tb_kind) + " words: " + str(tb.word_count)
                 #tb._print()
 
                 if tb_kind == TextBoxType.HEADING:
-                    title = lines2unicode(tb.lines, True, u"\n")
+                    title = lines2unicode(tb.lines, True, "\n")
                     sec = Section(title=title, pagenr=pagenr)
                     relation = HeuristicRegExes.compare_sections(last_title, title)
                     if relation is not HeuristicRegExes.ERROR_SECTION_RELATION:
@@ -181,8 +181,8 @@ class HeuristicManager(object):
                     accu_heading_nr = tb
                 elif tb_kind == TextBoxType.HEADING_PART_HEADING:
                     if accu_heading_nr:
-                        title=lines2unicode(tb.lines, True, u"\n")
-                        number=lines2unicode(accu_heading_nr.lines, True, u"\n")
+                        title=lines2unicode(tb.lines, True, "\n")
+                        number=lines2unicode(accu_heading_nr.lines, True, "\n")
                         sec = Section(title=title, number=number, pagenr=pagenr)
                         relation = HeuristicRegExes.compare_sections(last_title, number)
                         if relation is not HeuristicRegExes.ERROR_SECTION_RELATION:
@@ -194,17 +194,17 @@ class HeuristicManager(object):
                         accu_heading_nr = None
 
                 elif tb_kind == TextBoxType.FOOTNOTE:
-                    node.add_child(Footnote(text=lines2unicode(tb.lines, True, u"\n"), pagenr=pagenr))
+                    node.add_child(Footnote(text=lines2unicode(tb.lines, True, "\n"), pagenr=pagenr))
                 elif tb_kind == TextBoxType.PARAGRAPH:
-                    font = unicode(tb.font[0])
-                    fontsize = unicode(tb.font[1])
-                    emph = [unicode(e) for e in tb.emph]
-                    node.add_child(Paragraph(text=lines2unicode(tb.lines, True, u"\n"), pagenr=pagenr, font=font, fontsize=fontsize, emph=emph))
+                    font = str(tb.font[0])
+                    fontsize = str(tb.font[1])
+                    emph = [str(e) for e in tb.emph]
+                    node.add_child(Paragraph(text=lines2unicode(tb.lines, True, "\n"), pagenr=pagenr, font=font, fontsize=fontsize, emph=emph))
                 elif tb_kind == TextBoxType.PARAGRAPH_WITH_HEADING:
                     heading_line_count = lines_using(tb.lines, tb.emph, True)
                     heading_lines = tb.lines[:heading_line_count]
                     paragraph_lines = tb.lines[heading_line_count:]
-                    title = lines2unicode(heading_lines, True, u"\n")
+                    title = lines2unicode(heading_lines, True, "\n")
                     sec = Section(title=title, pagenr=pagenr)
                     relation = HeuristicRegExes.compare_sections(last_title, title)
                     if relation is not HeuristicRegExes.ERROR_SECTION_RELATION:
@@ -213,13 +213,13 @@ class HeuristicManager(object):
                         node.add_child(sec)
                     node = sec
                     last_title = title
-                    font = unicode(tb.font[0])
-                    fontsize = unicode(tb.font[1])
-                    emph = [unicode(e) for e in tb.emph]
-                    node.add_child(Paragraph(text=lines2unicode(paragraph_lines, True, u"\n"), pagenr=pagenr, font=font, fontsize=fontsize, emph=emph))
+                    font = str(tb.font[0])
+                    fontsize = str(tb.font[1])
+                    emph = [str(e) for e in tb.emph]
+                    node.add_child(Paragraph(text=lines2unicode(paragraph_lines, True, "\n"), pagenr=pagenr, font=font, fontsize=fontsize, emph=emph))
 
                 elif TextBoxType.is_float(tb_kind):
-                    node.add_child(Float(text=lines2unicode(tb.lines, True, u"\n"), pagenr=pagenr))
+                    node.add_child(Float(text=lines2unicode(tb.lines, True, "\n"), pagenr=pagenr))
 
         doc_check = DocumentChecker()
         return doc_check.cleanup(root)
@@ -394,9 +394,9 @@ if __name__ == '__main__':
     assert HeuristicRegExes.compare_sections(sect, sec2) == 0
     assert HeuristicRegExes.compare_sections(subs, sect) == -1
 
-    footnote = u"2Foo is part of bar."
-    nofootnote = u"2.3 Foobar"
-    nofootnoteeither = u"2.3"
+    footnote = "2Foo is part of bar."
+    nofootnote = "2.3 Foobar"
+    nofootnoteeither = "2.3"
     res1 = re.match(HeuristicRegExes.LATEX_FOOTNOTE, footnote, re.U)
     res2 = re.match(HeuristicRegExes.LATEX_FOOTNOTE, nofootnote, re.U)
     res3 = re.match(HeuristicRegExes.LATEX_FOOTNOTE, nofootnoteeither, re.U)

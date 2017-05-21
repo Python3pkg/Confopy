@@ -32,4 +32,4 @@ def PDF2document(filepath):
     return hm.generate_document(pages)
 
 def PDFs2documents(filepaths):
-    return map(PDF2document, filepaths)
+    return list(map(PDF2document, filepaths))

@@ -10,6 +10,7 @@ from math import fsum
 
 from confopy.analysis import Metric, Analyzer, SpellChecker, NO_WORDS
 from pattern.de import lemma, tenses
+from functools import reduce
 
 # General German metrics
 
@@ -17,9 +18,9 @@ class WordLengthMetric(Metric):
     """Average word length of all words of a Node.
     """
     def __init__(self):
-        super(WordLengthMetric, self).__init__(u"wordlength",
-                                               u"de",
-                                               u"Durchschnittliche Wortlänge")
+        super(WordLengthMetric, self).__init__("wordlength",
+                                               "de",
+                                               "Durchschnittliche Wortlänge")
 
     def evaluate(self, node):
         A = Analyzer.instance()
@@ -37,10 +38,10 @@ class SpellCheckMetric(Metric):
     """Number of spelling errors relative to number of all words.
     """
     def __init__(self):
-        super(SpellCheckMetric, self).__init__(u"spellcheck",
-                                               u"de",
-                                               u"-",
-                                               u"""\
+        super(SpellCheckMetric, self).__init__("spellcheck",
+                                               "de",
+                                               "-",
+                                               """\
 Anzahl an Rechtschreibfehlern relativ zur Gesamtanzahl aller Wörter.""")
 
     def evaluate(self, node):
@@ -64,24 +65,24 @@ class LexiconMetric(Metric):
     """Number of unique words (lemmata) relative to total number of words.
     """
     def __init__(self):
-        super(LexiconMetric, self).__init__(u"lexicon",
-                                            u"de",
-                                            u"-",
-                                            u"""\
+        super(LexiconMetric, self).__init__("lexicon",
+                                            "de",
+                                            "-",
+                                            """\
 Anzahl einzigartiger Lemmata relativ zur Gesamtanzahl aller Wörter.""")
 
     def evaluate(self, node):
         words = node.words()
         words_no_no_words = [w for w in words if w not in NO_WORDS]
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         tagger = corp.tagger(True)
         tagged_words = tagger.tag(words)
         unique_words = set()
         if len(tagged_words) > 0 and len(words_no_no_words) > 0:
             for w in tagged_words:
                 if w[0] not in NO_WORDS:
-                    if w[1] and w[1].startswith(u"V"):
+                    if w[1] and w[1].startswith("V"):
                         lemm = lemma(w[0])
                         unique_words.add(lemm)
                     else:
@@ -95,13 +96,13 @@ class SentLengthMetric(Metric):
     """Average sentence length.
     """
     def __init__(self):
-        super(SentLengthMetric, self).__init__(u"sentlength",
-                                               u"de",
-                                               u"Durchschnittliche Satzlänge")
+        super(SentLengthMetric, self).__init__("sentlength",
+                                               "de",
+                                               "Durchschnittliche Satzlänge")
 
     def evaluate(self, node):
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents = node.sents(tokenizer=corp.sent_tokenizer())
         summ = 0
         for s in sents:
@@ -119,16 +120,16 @@ class ARIMetric(Metric):
     """Automated Readability Index
     """
     def __init__(self):
-        super(ARIMetric, self).__init__(u"ari",
-                                        u"de",
-                                        u"Automated Readability Index",
-                                        u"""\
+        super(ARIMetric, self).__init__("ari",
+                                        "de",
+                                        "Automated Readability Index",
+                                        """\
 Je größer der Wert, desto anspruchsvoller ist der Text.""")
 
     def evaluate(self, node):
         words = [w for w in node.words() if w not in NO_WORDS]
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents = node.sents(tokenizer=corp.sent_tokenizer())
         char_count = float(sum([len(w) for w in words]))
         word_count = float(len(words))
@@ -145,20 +146,20 @@ Analyzer.register(ARIMetric())
 ### unpersönlicher Schreibstil (sie, wir, ich je Satz zählen)
 class PersonalStyleMetric(Metric):
 
-    PERSONAL = [u"ich", u"wir", u"sie"]
+    PERSONAL = ["ich", "wir", "sie"]
 
     def __init__(self):
-        super(PersonalStyleMetric, self).__init__(u"personalstyle",
-                                                  u"de",
-                                                  u"Persönlicher Schreibstil",
-                                                  u"""\
+        super(PersonalStyleMetric, self).__init__("personalstyle",
+                                                  "de",
+                                                  "Persönlicher Schreibstil",
+                                                  """\
 Vorkommen von 'ich', 'wir', 'sie' relativ zur Satzanzahl.
     Je kleiner der Wert, desto besser.""")
 
     def evaluate(self, node):
         words = node.words()
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents_count = len(node.sents(tokenizer=corp.sent_tokenizer()))
         count = 0
         for w in words:
@@ -173,19 +174,19 @@ Analyzer.register(PersonalStyleMetric())
 #### durchschnittliche Anzahl von Passiv-/"Man"-Konstrukten pro Satz
 class ImpersonalStyleMetric(Metric):
     def __init__(self,
-                 ID=u"impersonalstyle",
-                 lang=u"de",
-                 brief=u"Unpersönlicher Schreibstil",
-                 description=u"""\
+                 ID="impersonalstyle",
+                 lang="de",
+                 brief="Unpersönlicher Schreibstil",
+                 description="""\
 Anzahl an 'man' relativ zur Satzanzahl.
     Je kleiner der Wert, desto besser."""):
         super(ImpersonalStyleMetric, self).__init__(ID, lang, brief, description)
-        self.IMPERSONAL = [u"man"]
+        self.IMPERSONAL = ["man"]
 
     def evaluate(self, node):
         words = node.words()
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents_count = len(node.sents(tokenizer=corp.sent_tokenizer()))
         count = 0
         for w in words:
@@ -201,34 +202,34 @@ Analyzer.register(ImpersonalStyleMetric())
 class PassiveConstructsMetric(ImpersonalStyleMetric):
     """docstring for PassiveConstructsMetric"""
     def __init__(self):
-        super(PassiveConstructsMetric, self).__init__(u"passiveconstructs",
-                                                      u"de",
+        super(PassiveConstructsMetric, self).__init__("passiveconstructs",
+                                                      "de",
                                                       "Passivkonstrukte mit 'wird'/'werden'",
-                                                      u"""\
+                                                      """\
 Anzahl an 'wird'/'werden' relativ zur Satzanzahl.
     Je kleiner der Wert, desto besser.""")
-        self.IMPERSONAL = [u"wird", u"werden"]
+        self.IMPERSONAL = ["wird", "werden"]
 Analyzer.register(PassiveConstructsMetric())
 
 ### Zeitform (Präsens), Anzahl der Verben in Präs. durch Gesamtanzahl an Verben
 class SimplePresentMetric(Metric):
     def __init__(self):
-        super(SimplePresentMetric, self).__init__(u"simplepres",
-                                                  u"de",
-                                                  u"Verben im Präsenz",
-                                                  u"""\
+        super(SimplePresentMetric, self).__init__("simplepres",
+                                                  "de",
+                                                  "Verben im Präsenz",
+                                                  """\
 Anzahl an Verben im Präsenz relativ zur Gesamtanzahl aller Verben.
     Je höher der Wert, desto besser.""")
 
     def evaluate(self, node):
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         tagger = corp.tagger(True)
         tagged_words = tagger.tag(node.words())
         pres_verbs = 0
         total_verbs = 0
         for w in tagged_words:
-            if w[1] and w[1].startswith(u"V"):
+            if w[1] and w[1].startswith("V"):
                 #if w[1].startswith(u"VVFIN") or\
                 #   w[1].startswith(u"VAFIN") or\
                 #   w[1].startswith(u"VVINF") or\
@@ -258,16 +259,16 @@ class AdverbModifierMetric(Metric):
     """
     """
     def __init__(self):
-        super(AdverbModifierMetric, self).__init__(u"adverbmodifier",
-                                                   u"de",
-                                                   u"Verstärkende/unpräzise Adverbien",
-                                                   u"""\
+        super(AdverbModifierMetric, self).__init__("adverbmodifier",
+                                                   "de",
+                                                   "Verstärkende/unpräzise Adverbien",
+                                                   """\
 Anzahl verstärkender Adverbien relativ zur Gesamtanzahl aller Wörter.
     Je kleiner der Wert, desto besser.""")
 
     def evaluate(self, node):
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         tagger = corp.tagger(True)
         words = node.words()
         words_no_no_words = [w for w in words if w not in NO_WORDS]
@@ -275,7 +276,7 @@ Anzahl verstärkender Adverbien relativ zur Gesamtanzahl aller Wörter.
         word_count = len(words_no_no_words)
         count = 0
         for w in tagged_words:
-            if w[1] and u"ADV-MO" == w[1]:
+            if w[1] and "ADV-MO" == w[1]:
                 count += 1
         if word_count > 0:
             return float(count) / word_count
@@ -287,10 +288,10 @@ Analyzer.register(AdverbModifierMetric())
 class DeadVerbsMetric(Metric):
     """docstring for DeadVerbsMetric"""
     def __init__(self,
-                 ID=u"deadverbs",
-                 lang=u"de",
-                 brief=u"Anzahl toter Verben",
-                 description=u"""\
+                 ID="deadverbs",
+                 lang="de",
+                 brief="Anzahl toter Verben",
+                 description="""\
 Relativ zur Satzanzahl. Tote Verben sind folgende:
       * gehören
       * liegen
@@ -308,19 +309,19 @@ Relativ zur Satzanzahl. Tote Verben sind folgende:
                                               description)
         # weitere tote Verben aus:
         #  http://www.marcoprestel.de/stil12.html
-        self.VERBS = [u"gehören", u"liegen", u"beinhalten", u"enthalten", u"befinden", u"geben", u"bewirken", u"bewerkstelligen", u"vergegenwärtigen"]
+        self.VERBS = ["gehören", "liegen", "beinhalten", "enthalten", "befinden", "geben", "bewirken", "bewerkstelligen", "vergegenwärtigen"]
 
     def evaluate(self, node):
         words = node.words()
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents_count = len(node.sents(tokenizer=corp.sent_tokenizer()))
         tagger = corp.tagger(True)
         tagged_words = tagger.tag(words)
         count = 0
         if len(tagged_words) > 0:
             for w in tagged_words:
-                if w[1] and w[1].startswith(u"V"):
+                if w[1] and w[1].startswith("V"):
                     lemm = lemma(w[0])
                     if lemm in self.VERBS:
                         count += 1
@@ -332,16 +333,16 @@ class FillerMetric(Metric):
     """Number of fillers relative to total number of words of a given Node.
     """
     def __init__(self):
-        super(FillerMetric, self).__init__(u"fillers",
-                                           u"de",
-                                           u"Füllwortdichte",
-                                           u"""\
+        super(FillerMetric, self).__init__("fillers",
+                                           "de",
+                                           "Füllwortdichte",
+                                           """\
 Anzahl an Füllwörtern relativ zur Gesamtanzahl aller Wörter.
     Je kleiner der Wert, desto besser.""")
 
     def evaluate(self, node):
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         fillers = list()
         if corp:
             fillers = corp.fillers()
@@ -361,12 +362,12 @@ Analyzer.register(FillerMetric())
 #### Vorkommnisse von "Beispiel", "beispielsweise", "z.B."
 #### nahe beieinander liegende Vorkommen weniger positiv beurteilen (da wahrsch. selbes Bsp.)
 class ExampleCountMetric(Metric):
-    BSP_INDICATORS = [u"beispiel", u"bsp", u"bsp.", u"zb", u"z.b.", u"beispielsweise", u"bspw", u"bspw."]
+    BSP_INDICATORS = ["beispiel", "bsp", "bsp.", "zb", "z.b.", "beispielsweise", "bspw", "bspw."]
     def __init__(self):
-        super(ExampleCountMetric, self).__init__(u"examplecount",
-                                                 u"de",
-                                                 u"Beispielanzahl",
-                                                 u"""\
+        super(ExampleCountMetric, self).__init__("examplecount",
+                                                 "de",
+                                                 "Beispielanzahl",
+                                                 """\
 Je größer der Wert, desto besser.""")
 
     def evaluate(self, node):
@@ -385,14 +386,14 @@ class SentenceLengthVariationMetric(Metric):
     """Determines the variation of sentence length of subsequent sentences.
     """
     def __init__(self):
-        super(SentenceLengthVariationMetric, self).__init__(u"sentlengthvar",
-                                                            u"de",
-                                                            u"Variation der Satzlänge",
-                                                            u"Je größer der Wert, desto besser.")
+        super(SentenceLengthVariationMetric, self).__init__("sentlengthvar",
+                                                            "de",
+                                                            "Variation der Satzlänge",
+                                                            "Je größer der Wert, desto besser.")
 
     def evaluate(self, node):
         A = Analyzer.instance()
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         sents = node.sents(tokenizer=corp.sent_tokenizer())
         sent_len_diff = 0
         last_sent = None

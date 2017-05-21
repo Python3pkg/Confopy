@@ -7,7 +7,7 @@ Description:
     Metrics.
 '''
 
-from localizable import Localizable
+from .localizable import Localizable
 
 #import nltk
 #
@@ -22,7 +22,7 @@ from localizable import Localizable
 class Metric(Localizable):
     """Superclass for all Metrics.
     """
-    def __init__(self, ID, language, brief=u"", description=u""):
+    def __init__(self, ID, language, brief="", description=""):
         super(Metric, self).__init__(ID=ID, language=language, brief=brief, description=description)
 
     def evaluate(self, node):

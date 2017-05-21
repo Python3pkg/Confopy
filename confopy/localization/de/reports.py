@@ -8,10 +8,11 @@ Description:
 
 from confopy.analysis import Report, Analyzer, mean_stdev
 from confopy.analysis.rule import eval_doc
+from functools import reduce
 
 
-METRIC_NAMES = [u"wordlength", u"spellcheck", u"lexicon", u"sentlength", u"ari", u"personalstyle", u"impersonalstyle", u"passiveconstructs", u"simplepres", u"adverbmodifier", u"deadverbs", u"fillers", u"examplecount", u"sentlengthvar"]
-RULE_NAMES = [u"introduction", u"subsections", u"floatreference", u"floatreferencebefore", u"floatcaption"]
+METRIC_NAMES = ["wordlength", "spellcheck", "lexicon", "sentlength", "ari", "personalstyle", "impersonalstyle", "passiveconstructs", "simplepres", "adverbmodifier", "deadverbs", "fillers", "examplecount", "sentlengthvar"]
+RULE_NAMES = ["introduction", "subsections", "floatreference", "floatreferencebefore", "floatcaption"]
 MAX_METRIC_STR_LEN = reduce(max, [len(name) for name in METRIC_NAMES])
 PAD = 2
 METRIC_COL_WIDTH = MAX_METRIC_STR_LEN + PAD
@@ -21,10 +22,10 @@ class DocumentAverages(Report):
     """Average metric values for multiple documents.
     """
     def __init__(self):
-        super(DocumentAverages, self).__init__(u"docsavg",
-                                               u"de",
-                                               u"Durchschnitt über mehrere Dokumente",
-                                               u"""\
+        super(DocumentAverages, self).__init__("docsavg",
+                                               "de",
+                                               "Durchschnitt über mehrere Dokumente",
+                                               """\
 Evaluiert die Metriken für mehrere Dokumente, berechnet den Durchschnitt
     und die Standardabweichung.
     Listet in der letzten Spalte die Metrikwerte des TIGER-Corpus (deutsche
@@ -37,36 +38,36 @@ Evaluiert die Metriken für mehrere Dokumente, berechnet den Durchschnitt
         A = Analyzer.instance()
         metrics = [A.get(metric=m) for m in metric_names]
         metrics = [m for m in metrics if m != None]
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         results = list()
         for m in metrics:
             results.append([m.evaluate(d) for d in docs])
         stats = [mean_stdev(r, ROUND) for r in results]
         if args.latex:
-            output.append(u"\\begin{tabular}{l|l l|r}")
-            output.append(u"    Metric & mean & stdev & TIGER \\\\")
-            output.append(u"    \\hline")
+            output.append("\\begin{tabular}{l|l l|r}")
+            output.append("    Metric & mean & stdev & TIGER \\\\")
+            output.append("    \\hline")
         else:
-            output.append(u"# Bericht \"%s\"" % self.ID)
-            output.append(u"")
-            output.append(u" * MEAN:  der Mittelwert über alle Dokumente")
-            output.append(u" * STDEV: die dazugehörige Standardabweichung")
-            output.append(u" * TIGER: Metrikwert für die deutsche Sprachereferenz,")
-            output.append(u"          den TIGER-Corpus")
-            output.append(u"")
-            output.append(u"%s | MEAN  | STDEV | TIGER" % u"METRIC".ljust(METRIC_COL_WIDTH))
-            output.append(u"%s-+-------+-------+------" % u"".ljust(METRIC_COL_WIDTH, u"-"))
+            output.append("# Bericht \"%s\"" % self.ID)
+            output.append("")
+            output.append(" * MEAN:  der Mittelwert über alle Dokumente")
+            output.append(" * STDEV: die dazugehörige Standardabweichung")
+            output.append(" * TIGER: Metrikwert für die deutsche Sprachereferenz,")
+            output.append("          den TIGER-Corpus")
+            output.append("")
+            output.append("%s | MEAN  | STDEV | TIGER" % "METRIC".ljust(METRIC_COL_WIDTH))
+            output.append("%s-+-------+-------+------" % "".ljust(METRIC_COL_WIDTH, "-"))
         for i in range(len(metrics)):
             # Execute metrics on reference corpus
             val = metrics[i].evaluate(corp)
             val = round(val, ROUND)
             if args.latex:
-                output.append(u"    %s & %s & %s & %s \\\\" % (metric_names[i].ljust(METRIC_COL_WIDTH), stats[i][0], stats[i][1], val))
+                output.append("    %s & %s & %s & %s \\\\" % (metric_names[i].ljust(METRIC_COL_WIDTH), stats[i][0], stats[i][1], val))
             else:
-                output.append(u"%s | %05.2f | %05.2f | %05.2f" % (metric_names[i].ljust(METRIC_COL_WIDTH), stats[i][0], stats[i][1], val))
+                output.append("%s | %05.2f | %05.2f | %05.2f" % (metric_names[i].ljust(METRIC_COL_WIDTH), stats[i][0], stats[i][1], val))
         if args.latex:
-            output.append(u"\\end{tabular}")
-        return u"\n".join(output)
+            output.append("\\end{tabular}")
+        return "\n".join(output)
 
 Analyzer.register(DocumentAverages())
 
@@ -76,10 +77,10 @@ class DocumentComparison(Report):
     PAD = 2
 
     def __init__(self):
-        super(DocumentComparison, self).__init__(u"doccomp",
-                                                 u"de",
-                                                 u"Vergleicht Vorher-/Nachher-Versionen",
-                                                 u"""\
+        super(DocumentComparison, self).__init__("doccomp",
+                                                 "de",
+                                                 "Vergleicht Vorher-/Nachher-Versionen",
+                                                 """\
 Benötigt eine gerade Anzahl n an Dokumenten (mind. 2).
     Vergleicht das erste Dokument mit dem (n / 2) + 1-sten Dokument usw.
     Bei 2 Dokumenten werden jeweils die Metriken bestimmt und gegenüber-
@@ -89,55 +90,55 @@ Benötigt eine gerade Anzahl n an Dokumenten (mind. 2).
     Unterstützt die Option --latex.""")
 
     def _compare(self, vals):
-        return u"="
+        return "="
 
     def execute(self, docs, args):
         output = list()
         if len(docs) < 2 or len(docs) % 2 != 0:
-            output.append(u"Error: Need an even number of documents (at least 2) for the document comparison report!")
+            output.append("Error: Need an even number of documents (at least 2) for the document comparison report!")
         else:
             metric_names = METRIC_NAMES
             A = Analyzer.instance()
             metrics = [A.get(metric=m) for m in metric_names]
             metrics = [m for m in metrics if m != None]
             if len(docs) == 2:
-                output.append(u"# Bericht \"%s\""% self.ID)
-                output.append(u"")
-                output.append(u" * PROGRESS: Vorher- --> Nachher-Wert.")
-                output.append(u"             (+) ... Erhöhung         ")
-                output.append(u"             (-) ... Verringerung     ")
-                output.append(u"             (=) ... gleichbleibend   ")
-                output.append(u"")
-                output.append(u"%s | PROGRESS" % u"METRIC".ljust(METRIC_COL_WIDTH))
-                output.append(u"%s-+---------------------" % u"".ljust(METRIC_COL_WIDTH, u"-"))
+                output.append("# Bericht \"%s\""% self.ID)
+                output.append("")
+                output.append(" * PROGRESS: Vorher- --> Nachher-Wert.")
+                output.append("             (+) ... Erhöhung         ")
+                output.append("             (-) ... Verringerung     ")
+                output.append("             (=) ... gleichbleibend   ")
+                output.append("")
+                output.append("%s | PROGRESS" % "METRIC".ljust(METRIC_COL_WIDTH))
+                output.append("%s-+---------------------" % "".ljust(METRIC_COL_WIDTH, "-"))
                 for m in metrics:
                     vals = [m.evaluate(doc) for doc in docs]
-                    progress = u"="
+                    progress = "="
                     if vals[0] > vals[1]:
-                        progress = u"-"
+                        progress = "-"
                     elif vals[0] < vals[1]:
-                        progress = u"+"
-                    output.append(u"%s | %05.2f --> %05.2f  (%s)" % (m.ID.ljust(METRIC_COL_WIDTH), vals[0], vals[1], progress))
+                        progress = "+"
+                    output.append("%s | %05.2f --> %05.2f  (%s)" % (m.ID.ljust(METRIC_COL_WIDTH), vals[0], vals[1], progress))
 
             else:
                 half = len(docs) / 2
                 if args.latex:
-                    output.append(u"\\begin{tabular}{l|l l|l l|r}")
-                    output.append(u"\\multirow{2}{*}{\\textbf{Metrik}} & \\multicolumn{2}{|c|}{\\textbf{Erhöhung}} & \\multicolumn{2}{|c|}{\\textbf{Verringerung}} & \\textbf{gleichbleibend} \\\\")
-                    output.append(u"                                 & \\multicolumn{1}{|c}{$\\#$} & \\multicolumn{1}{c|}{$\\Delta$} & \\multicolumn{1}{|c}{$\\#$} & \\multicolumn{1}{c|}{$\\Delta$} & \\multicolumn{1}{c}{$\\#$} \\\\")
-                    output.append(u"    \\hline")
+                    output.append("\\begin{tabular}{l|l l|l l|r}")
+                    output.append("\\multirow{2}{*}{\\textbf{Metrik}} & \\multicolumn{2}{|c|}{\\textbf{Erhöhung}} & \\multicolumn{2}{|c|}{\\textbf{Verringerung}} & \\textbf{gleichbleibend} \\\\")
+                    output.append("                                 & \\multicolumn{1}{|c}{$\\#$} & \\multicolumn{1}{c|}{$\\Delta$} & \\multicolumn{1}{|c}{$\\#$} & \\multicolumn{1}{c|}{$\\Delta$} & \\multicolumn{1}{c}{$\\#$} \\\\")
+                    output.append("    \\hline")
                 else:
-                    output.append(u"# Bericht \"%s\"" % self.ID)
-                    output.append(u"")
-                    output.append(u" * +:      Anzahl an Metrikerhöhungen")
-                    output.append(u" * DELTA+: Durchschnittliche Erhöhung um diesen Wert")
-                    output.append(u" * -:      Anzahl an Metrikverringerungen")
-                    output.append(u" * DELTA-: Durchschnittliche Verringerung um diesen Wert")
-                    output.append(u" * =:      Anzahl an Dokumentpaaren, bei denen der")
-                    output.append(u"           Metrikwert gleich geblieben ist")
-                    output.append(u"")
-                    output.append(u"%s | +  | DELTA+ | -  | DELTA- | =  " % u"METRIC".ljust(METRIC_COL_WIDTH))
-                    output.append(u"%s-+----+--------+----+--------+----" % u"".ljust(METRIC_COL_WIDTH, u"-"))
+                    output.append("# Bericht \"%s\"" % self.ID)
+                    output.append("")
+                    output.append(" * +:      Anzahl an Metrikerhöhungen")
+                    output.append(" * DELTA+: Durchschnittliche Erhöhung um diesen Wert")
+                    output.append(" * -:      Anzahl an Metrikverringerungen")
+                    output.append(" * DELTA-: Durchschnittliche Verringerung um diesen Wert")
+                    output.append(" * =:      Anzahl an Dokumentpaaren, bei denen der")
+                    output.append("           Metrikwert gleich geblieben ist")
+                    output.append("")
+                    output.append("%s | +  | DELTA+ | -  | DELTA- | =  " % "METRIC".ljust(METRIC_COL_WIDTH))
+                    output.append("%s-+----+--------+----+--------+----" % "".ljust(METRIC_COL_WIDTH, "-"))
                 for m in metrics:
                     results = list()
                     for i in range(half):
@@ -160,12 +161,12 @@ Benötigt eine gerade Anzahl n an Dokumenten (mind. 2).
                         avg_diffs[1] /= float(counts[1])
                         avg_diffs[1] = round(avg_diffs[1], ROUND + 1)
                     if args.latex:
-                        output.append(u"    %s & %s & %s & %s & %s & %s \\\\" % (m.ID, counts[0], avg_diffs[0], counts[1], avg_diffs[1], counts[2]))
+                        output.append("    %s & %s & %s & %s & %s & %s \\\\" % (m.ID, counts[0], avg_diffs[0], counts[1], avg_diffs[1], counts[2]))
                     else:
-                        output.append(u"%s | %02d | %06.3f | %02d | %06.3f | %02d" % (m.ID.ljust(METRIC_COL_WIDTH), counts[0], avg_diffs[0], counts[1], avg_diffs[1], counts[2]))
+                        output.append("%s | %02d | %06.3f | %02d | %06.3f | %02d" % (m.ID.ljust(METRIC_COL_WIDTH), counts[0], avg_diffs[0], counts[1], avg_diffs[1], counts[2]))
                 if args.latex:
-                    output.append(u"\\end{tabular}")
-        return u"\n".join(output)
+                    output.append("\\end{tabular}")
+        return "\n".join(output)
 
 Analyzer.register(DocumentComparison())
 
@@ -175,10 +176,10 @@ class MultiDocumentReport(Report):
     """Metric values for multiple documents.
     """
     def __init__(self,
-                 ID=u"multidoc",
-                 lang=u"de",
-                 brief=u"Überblick über mehrere Dokumente",
-                 description=u"""\
+                 ID="multidoc",
+                 lang="de",
+                 brief="Überblick über mehrere Dokumente",
+                 description="""\
 Berechnet die Metrikwerte für mehrere Dokumente.
     Zählt zusätzlich die Anzahl der Regelverletzungen und der
     Über-/Unterschreitungen der Metrikerwartungsbereiche.
@@ -207,61 +208,61 @@ Berechnet die Metrikwerte für mehrere Dokumente.
         A = Analyzer.instance()
         metrics = [A.get(metric=m) for m in metric_names]
         metrics = [m for m in metrics if m != None]
-        corp = A.get(corpus=u"TIGER")
+        corp = A.get(corpus="TIGER")
         results = list()
         for m in metrics:
             results.append([m.evaluate(d) for d in docs])
 
         exceedances = self.compute_exceedances(metric_names, results)
-        exceedances_transposed = list(map(list, zip(*exceedances)))
+        exceedances_transposed = list(map(list, list(zip(*exceedances))))
 
         # Metric matrix output
-        doc_numbers = range(1, len(docs) + 1)
+        doc_numbers = list(range(1, len(docs) + 1))
         if args.latex:
-            tabular_format_str = [u" r" for d in docs]
-            tabular_format_str = u"".join(tabular_format_str)
-            output.append(u"\\begin{tabular}{l|%s}" % tabular_format_str)
-            docs_header_str = map(u"& doc%02d ".__mod__, doc_numbers)
-            docs_header_str = u"".join(docs_header_str)
-            output.append(u"    Metrik %s\\\\" % docs_header_str)
-            output.append(u"    \\hline")
+            tabular_format_str = [" r" for d in docs]
+            tabular_format_str = "".join(tabular_format_str)
+            output.append("\\begin{tabular}{l|%s}" % tabular_format_str)
+            docs_header_str = list(map("& doc%02d ".__mod__, doc_numbers))
+            docs_header_str = "".join(docs_header_str)
+            output.append("    Metrik %s\\\\" % docs_header_str)
+            output.append("    \\hline")
             for i in range(len(metrics)):
-                value_str = u""
+                value_str = ""
                 for doc_nr in range(len(results[i])):
                     if exceedances[i][doc_nr] == 1:
-                        value_str = value_str + u"& \emph{%.2f} " % results[i][doc_nr]
+                        value_str = value_str + "& \emph{%.2f} " % results[i][doc_nr]
                     else:
-                        value_str = value_str + u"& %.2f " % results[i][doc_nr]
+                        value_str = value_str + "& %.2f " % results[i][doc_nr]
                 #value_str = map(u"& %.2f ".__mod__, results[i])
                 #value_str = u"".join(value_str)
-                output.append(u"    %s %s\\\\" % (metric_names[i].ljust(METRIC_COL_WIDTH), value_str))
+                output.append("    %s %s\\\\" % (metric_names[i].ljust(METRIC_COL_WIDTH), value_str))
         else:
-            output.append(u"# Bericht \"%s\"" % self.ID)
-            output.append(u"")
-            docs_header_str = map(u"| doc%02d ".__mod__, doc_numbers)
-            docs_header_str = u"".join(docs_header_str)
-            output.append(u"%s%s" % (u"METRIC".ljust(METRIC_COL_WIDTH), docs_header_str))
+            output.append("# Bericht \"%s\"" % self.ID)
+            output.append("")
+            docs_header_str = list(map("| doc%02d ".__mod__, doc_numbers))
+            docs_header_str = "".join(docs_header_str)
+            output.append("%s%s" % ("METRIC".ljust(METRIC_COL_WIDTH), docs_header_str))
             dash_length = len(docs_header_str) - 2
             if dash_length < 0:
                 dash_length = 0
-            output.append(u"%s+%s" % (u"".ljust(METRIC_COL_WIDTH, u"-"), u"".ljust(dash_length, u"-")))
+            output.append("%s+%s" % ("".ljust(METRIC_COL_WIDTH, "-"), "".ljust(dash_length, "-")))
             for i in range(len(metrics)):
-                value_str = map(u"| %05.2f ".__mod__, results[i])
-                value_str = u"".join(value_str)
-                output.append(u"%s%s" % (metric_names[i].ljust(METRIC_COL_WIDTH), value_str))
+                value_str = list(map("| %05.2f ".__mod__, results[i]))
+                value_str = "".join(value_str)
+                output.append("%s%s" % (metric_names[i].ljust(METRIC_COL_WIDTH), value_str))
 
         # Exceedances/shortfalls
-        exceedances_counts = map(sum, exceedances_transposed)
+        exceedances_counts = list(map(sum, exceedances_transposed))
         if args.latex:
-            output.append(u"    \\hline")
-            exceedances_str = map(u"& %d ".__mod__, exceedances_counts)
-            exceedances_str = u"".join(exceedances_str)
-            output.append(u"    %s %s\\\\" % (u"Überschreitungen".ljust(METRIC_COL_WIDTH), exceedances_str))
+            output.append("    \\hline")
+            exceedances_str = list(map("& %d ".__mod__, exceedances_counts))
+            exceedances_str = "".join(exceedances_str)
+            output.append("    %s %s\\\\" % ("Überschreitungen".ljust(METRIC_COL_WIDTH), exceedances_str))
         else:
-            output.append(u"%s+%s" % (u"".ljust(METRIC_COL_WIDTH, u"-"), u"".ljust(dash_length, u"-")))
-            exceedances_str = map(u"|    %02d ".__mod__, exceedances_counts)
-            exceedances_str = u"".join(exceedances_str)
-            output.append(u"%s%s" % (u"Transgressions".ljust(METRIC_COL_WIDTH), exceedances_str))
+            output.append("%s+%s" % ("".ljust(METRIC_COL_WIDTH, "-"), "".ljust(dash_length, "-")))
+            exceedances_str = list(map("|    %02d ".__mod__, exceedances_counts))
+            exceedances_str = "".join(exceedances_str)
+            output.append("%s%s" % ("Transgressions".ljust(METRIC_COL_WIDTH), exceedances_str))
 
         # Rule violations
         rule_IDs = RULE_NAMES
@@ -269,16 +270,16 @@ Berechnet die Metrikwerte für mehrere Dokumente.
         violated_rule_counts = [len(eval_doc(doc, rules)) for doc in docs]
 
         if args.latex:
-            violated_rule_counts_str = map(u"& %d ".__mod__, violated_rule_counts)
-            violated_rule_counts_str = u"".join(violated_rule_counts_str)
-            output.append(u"    %s %s\\\\" % (u"Regelverletzungen".ljust(METRIC_COL_WIDTH), violated_rule_counts_str))
-            output.append(u"\\end{tabular}")
+            violated_rule_counts_str = list(map("& %d ".__mod__, violated_rule_counts))
+            violated_rule_counts_str = "".join(violated_rule_counts_str)
+            output.append("    %s %s\\\\" % ("Regelverletzungen".ljust(METRIC_COL_WIDTH), violated_rule_counts_str))
+            output.append("\\end{tabular}")
         else:
-            violated_rule_counts_str = map(u"|    %02d ".__mod__, violated_rule_counts)
-            violated_rule_counts_str = u"".join(violated_rule_counts_str)
-            output.append(u"%s%s" % (u"Violated rules".ljust(METRIC_COL_WIDTH), violated_rule_counts_str))
+            violated_rule_counts_str = list(map("|    %02d ".__mod__, violated_rule_counts))
+            violated_rule_counts_str = "".join(violated_rule_counts_str)
+            output.append("%s%s" % ("Violated rules".ljust(METRIC_COL_WIDTH), violated_rule_counts_str))
 
-        return u"\n".join(output)
+        return "\n".join(output)
 
 Analyzer.register(MultiDocumentReport())
 
@@ -287,7 +288,7 @@ Analyzer.register(MultiDocumentReport())
 class _MetricExpectation(object):
     """Stores expected metric values.
     """
-    def __init__(self, low=None, high=None, msg_toolow=u"", msg_toohigh=u"", msg_ok=u"OK!"):
+    def __init__(self, low=None, high=None, msg_toolow="", msg_toohigh="", msg_ok="OK!"):
         """Initializer.
         Args:
             low:         Lowest expected metric value.
@@ -304,79 +305,79 @@ class _MetricExpectation(object):
         self.msg_ok = msg_ok
 
 _METRIC_EXPECTATIONS = {
-    u"adverbmodifier":    _MetricExpectation(None       , 0.03 + 0.01, u"", u"Versuche weniger verstärkende/unpräzise Adverbien zu verwenden!"),
-    u"ari":               _MetricExpectation(None       , 67.6 + 4.36, u"", u"Erschwerte Lesbarkeit (zu lange Wörter/Sätze!)"),
-    u"deadverbs":         _MetricExpectation(None       , 0.03 + 0.03, u"", u"Versuche weniger tote Verben wie gehören, liegen, befinden, beinhalten, geben, bewirken etc. zu verwenden!"),
-    u"examplecount":      _MetricExpectation(1.83 - 0.83, None       , u"Versuche mehr Beispiele zu nennen!", u""),
-    u"fillers":           _MetricExpectation(None       , 0.02 + 0.01, u"", u"Zu viele Füllwörter!"),
-    u"impersonalstyle":   _MetricExpectation(None       , 0.02 + 0.03, u"", u"Zu viele Sätze mit 'man'."),
-    u"lexicon":           _MetricExpectation(0.51 - 0.05, 0.51 + 0.05, u"Zu geringer Wortschatz", u"Zu vielfältiger Wortschatz (viele Fremdwörter?)"),
-    u"passiveconstructs": _MetricExpectation(None       , 0.27 + 0.1 , u"", u"Versuche mehr aktive Sätze zu bilden!"),
-    u"personalstyle":     _MetricExpectation(None       , 0.03 + 0.03, u"", u"Zu persönlicher Schreibstil! Sätze mit 'ich', 'wir', 'sie' umschreiben!"),
-    u"sentlength":        _MetricExpectation(None       , 14.6 + 2.78, u"", u"Zu viele lange Sätze!"),
-    u"sentlengthvar":     _MetricExpectation(7.68 - 2.41, None       , u"Versuche kurze und lange Sätze mehr abzuwechseln!"),
-    u"simplepres":        _MetricExpectation(0.8  - 0.06, None       , u"Zu wenig Sätze sind in Präsenz geschrieben!"),
-    u"spellcheck":        _MetricExpectation(0.15 - 0.05, 0.15 + 0.05, u"Sehr armer Wortschatz!", u"Entweder zu viele Rechtschreibfehler oder zu viele Fremdwörter!"),
-    u"wordlength":        _MetricExpectation(None       , 6.02 + 0.26, u"", u"Versuche kürzere Wörter zu verwenden!"),
+    "adverbmodifier":    _MetricExpectation(None       , 0.03 + 0.01, "", "Versuche weniger verstärkende/unpräzise Adverbien zu verwenden!"),
+    "ari":               _MetricExpectation(None       , 67.6 + 4.36, "", "Erschwerte Lesbarkeit (zu lange Wörter/Sätze!)"),
+    "deadverbs":         _MetricExpectation(None       , 0.03 + 0.03, "", "Versuche weniger tote Verben wie gehören, liegen, befinden, beinhalten, geben, bewirken etc. zu verwenden!"),
+    "examplecount":      _MetricExpectation(1.83 - 0.83, None       , "Versuche mehr Beispiele zu nennen!", ""),
+    "fillers":           _MetricExpectation(None       , 0.02 + 0.01, "", "Zu viele Füllwörter!"),
+    "impersonalstyle":   _MetricExpectation(None       , 0.02 + 0.03, "", "Zu viele Sätze mit 'man'."),
+    "lexicon":           _MetricExpectation(0.51 - 0.05, 0.51 + 0.05, "Zu geringer Wortschatz", "Zu vielfältiger Wortschatz (viele Fremdwörter?)"),
+    "passiveconstructs": _MetricExpectation(None       , 0.27 + 0.1 , "", "Versuche mehr aktive Sätze zu bilden!"),
+    "personalstyle":     _MetricExpectation(None       , 0.03 + 0.03, "", "Zu persönlicher Schreibstil! Sätze mit 'ich', 'wir', 'sie' umschreiben!"),
+    "sentlength":        _MetricExpectation(None       , 14.6 + 2.78, "", "Zu viele lange Sätze!"),
+    "sentlengthvar":     _MetricExpectation(7.68 - 2.41, None       , "Versuche kurze und lange Sätze mehr abzuwechseln!"),
+    "simplepres":        _MetricExpectation(0.8  - 0.06, None       , "Zu wenig Sätze sind in Präsenz geschrieben!"),
+    "spellcheck":        _MetricExpectation(0.15 - 0.05, 0.15 + 0.05, "Sehr armer Wortschatz!", "Entweder zu viele Rechtschreibfehler oder zu viele Fremdwörter!"),
+    "wordlength":        _MetricExpectation(None       , 6.02 + 0.26, "", "Versuche kürzere Wörter zu verwenden!"),
 }
 
 class DocumentReport(Report):
     """Overview over a single document.
     """
     def __init__(self,
-                 ID=u"document",
-                 lang=u"de",
-                 brief=u"Überblick über ein einzelnes Dokument",
-                 description=u"""\
+                 ID="document",
+                 lang="de",
+                 brief="Überblick über ein einzelnes Dokument",
+                 description="""\
 Berechnet die Metriken für ein Dokument und überprüft die Regeln.
     Kann auch auf mehreren Dokumenten nacheinander ausgeführt werden."""):
         super(DocumentReport, self).__init__(ID, lang, brief, description)
 
     def execute(self, docs, args):
         if len(docs) < 1:
-            return u""
+            return ""
         output = []
         for doc in docs:
-            output.append(u"# Dokumentbericht")
-            output.append(u"")
-            output.append(u"## Metriken")
-            output.append(u"")
-            for metric_ID in sorted((_METRIC_EXPECTATIONS.keys())):
+            output.append("# Dokumentbericht")
+            output.append("")
+            output.append("## Metriken")
+            output.append("")
+            for metric_ID in sorted((list(_METRIC_EXPECTATIONS.keys()))):
                 output.append(self._execute_metric(metric_ID, doc))
-            output.append(u"")
-            output.append(u"## Regeln")
-            output.append(u"")
+            output.append("")
+            output.append("## Regeln")
+            output.append("")
             rule_IDs = RULE_NAMES
             A = Analyzer.instance()
             rules = [A.get(rule=ID) for ID in rule_IDs if A.get(rule=ID) is not None]
             rule_messages = eval_doc(doc, rules)
             if len(rule_messages) == 0:
-                output.append(u"Es liegen keine Regelverletzungen vor!")
+                output.append("Es liegen keine Regelverletzungen vor!")
             else:
                 for m in rule_messages:
                     output.append(m)
-        return u"\n".join(output)
+        return "\n".join(output)
 
     def _execute_metric(self, metric_ID, node):
         A = Analyzer.instance()
         metric = A.get(metric=metric_ID)
         val = metric.evaluate(node)
         expect = _METRIC_EXPECTATIONS.get(metric_ID, None)
-        output = u""
+        output = ""
         if expect is not None:
             val_str = str(round(val, ROUND))
             if (expect.low is not None) and (expect.high is not None):
-                output = u" * %s %s (erwartet: zw. %.2f und %.2f)" % (metric_ID, val_str, expect.low, expect.high)
+                output = " * %s %s (erwartet: zw. %.2f und %.2f)" % (metric_ID, val_str, expect.low, expect.high)
             elif expect.low is not None:
-                output = u" * %s %s (erwartet: min. %.2f)" % (metric_ID, val_str, expect.low)
+                output = " * %s %s (erwartet: min. %.2f)" % (metric_ID, val_str, expect.low)
             elif expect.high is not None:
-                output = u" * %s %s (erwartet: max. %.2f)" % (metric_ID, val_str, expect.high)
+                output = " * %s %s (erwartet: max. %.2f)" % (metric_ID, val_str, expect.high)
             if (expect.low is not None) and val < expect.low:
-                output += u"\n     %s" % expect.msg_toolow
+                output += "\n     %s" % expect.msg_toolow
             elif (expect.high is not None) and val > expect.high:
-                output += u"\n     %s" % expect.msg_toohigh
+                output += "\n     %s" % expect.msg_toohigh
             else:
-                output += u"\n     %s" % expect.msg_ok
+                output += "\n     %s" % expect.msg_ok
         return output
 
 Analyzer.register(DocumentReport())
@@ -387,25 +388,25 @@ class SectionsReport(DocumentReport):
     """Detailed analysis of a single document.
     """
     def __init__(self):
-        super(SectionsReport, self).__init__(u"sections",
-                                             u"de",
-                                             u"Abschnittsweise Analyse eines Dokuments",
-                                             u"""\
+        super(SectionsReport, self).__init__("sections",
+                                             "de",
+                                             "Abschnittsweise Analyse eines Dokuments",
+                                             """\
 Berechnet die Metriken für jedes Kapitel einzeln.""")
 
     def execute(self, docs, args):
         output = list()
-        output.append(u"# Abschnittsweiser Bericht")
-        output.append(u"")
+        output.append("# Abschnittsweiser Bericht")
+        output.append("")
         doc = docs[0]
         sections = doc.sections()
         for sec in sections:
-            output.append(u"## " + sec.title)
-            output.append(u"")
+            output.append("## " + sec.title)
+            output.append("")
             for metric_ID in sorted(_METRIC_EXPECTATIONS.keys()):
                 output.append(self._execute_metric(metric_ID, sec))
-            output.append(u"")
+            output.append("")
 
-        return u"\n".join(output)
+        return "\n".join(output)
 
 Analyzer.register(SectionsReport())

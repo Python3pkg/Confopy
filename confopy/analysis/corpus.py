@@ -7,36 +7,36 @@ Description:
 '''
 
 from nltk.corpus.reader.api import CorpusReader
-from localizable import Localizable
+from .localizable import Localizable
 from confopy.model import Document
 
 NO_WORDS = [
-      u"."
-    , u","
-    , u";"
-    , u":"
-    , u"+"
-    , u"/"
-    , u"!"
-    , u"?"
-    , u"("
-    , u")"
-    , u"["
-    , u"]"
-    , u"{"
-    , u"}"
-    , u"-"
-    , u"//"
-    , u"%"
-    , u"\u2013"
-    , u"\uf0f1"
+      "."
+    , ","
+    , ";"
+    , ":"
+    , "+"
+    , "/"
+    , "!"
+    , "?"
+    , "("
+    , ")"
+    , "["
+    , "]"
+    , "{"
+    , "}"
+    , "-"
+    , "//"
+    , "%"
+    , "\u2013"
+    , "\uf0f1"
 ]
 
 class Corpus(Localizable, CorpusReader, Document):
     """A corpus is a body of language data.
     """
 
-    def __init__(self, ID, language, brief=u"", description=u""):
+    def __init__(self, ID, language, brief="", description=""):
         """Initializer.
         Args:
             ID:          ID of the corpus (unicode string).

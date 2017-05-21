@@ -16,7 +16,7 @@ class Node(object):
     """Super class for all document components.
     """
 
-    def __init__(self, text=u"", pagenr=u"", parent=None, children=[]):
+    def __init__(self, text="", pagenr="", parent=None, children=[]):
         """Initializer.
         Args:
             text:     Unicode text of the node.
@@ -147,7 +147,7 @@ class Node(object):
                 buf.append(c.raw(recursive, False))
             else:
                 buf.append(c.raw(recursive, ignore_floats))
-        return u" ".join(buf)
+        return " ".join(buf)
 
     def words(self, recursive=True, ignore_floats=True):
         """Returns this node's text as a list of words.
@@ -185,7 +185,7 @@ class Node(object):
         return [wordpunct_tokenize(s) for s in sents]
 
     def __unicode__(self):
-        return u"%s(children=%s)" % (self.__class__.__name__, unicode(self._children))
+        return "%s(children=%s)" % (self.__class__.__name__, str(self._children))
 
     def __str__(self):
         return "%s(children=%s)" % (self.__class__.__name__, str(self._children))
@@ -200,7 +200,7 @@ class Node(object):
 
 class Float(Node):
     #DUMMY, FIGURE, TABLE, LISTING, DEFINITION, FORMULA, THEOREM, PROOF = range(8)
-    def __init__(self, text=u"", number=u"", pagenr=u""):
+    def __init__(self, text="", number="", pagenr=""):
         super(Float, self).__init__(text=text, pagenr=pagenr)
         self.number = number
 
@@ -217,7 +217,7 @@ class Float(Node):
 #        super(Misc, self).__init__(box=box)
 
 class Footnote(Float):
-    def __init__(self, text=u"", number=u"", pagenr=u""):
+    def __init__(self, text="", number="", pagenr=""):
         super(Footnote, self).__init__(text=text, number=number, pagenr=pagenr)
 
     def is_float(self):
@@ -250,7 +250,7 @@ class Footnote(Float):
 #        pass
 
 class Paragraph(Node):
-    def __init__(self, text, pagenr=u"", font=u"", fontsize=u"", emph=[], word_count=0):
+    def __init__(self, text, pagenr="", font="", fontsize="", emph=[], word_count=0):
         super(Paragraph, self).__init__(text=text, pagenr=pagenr)
         self.font = font
         self.fontsize = fontsize
@@ -262,7 +262,7 @@ class Paragraph(Node):
 
 
 class Section(Node):
-    def __init__(self, pagenr=u"", title=u"", number=u"", children=[]):
+    def __init__(self, pagenr="", title="", number="", children=[]):
         super(Section, self).__init__(pagenr=pagenr, children=children)
         self.title = title
         self.number = number
@@ -277,19 +277,19 @@ class Section(Node):
 #        return 0
 
     def __unicode__(self):
-        if self.number is not u"":
-            return u"%s(number=%s, title=%s)" % (self.__class__.__name__, self.number, self.title)
+        if self.number is not "":
+            return "%s(number=%s, title=%s)" % (self.__class__.__name__, self.number, self.title)
         else:
-            return u"%s(title=%s)" % (self.__class__.__name__, self.title)
+            return "%s(title=%s)" % (self.__class__.__name__, self.title)
 
     def __str__(self):
-        if self.number is not u"":
-            return u"%s(number=%s, title=%s)" % (self.__class__.__name__, self.number.encode("utf8"), self.title.encode("utf8"))
+        if self.number is not "":
+            return "%s(number=%s, title=%s)" % (self.__class__.__name__, self.number.encode("utf8"), self.title.encode("utf8"))
         else:
-            return u"%s(title=%s)" % (self.__class__.__name__, self.title.encode("utf8"))
+            return "%s(title=%s)" % (self.__class__.__name__, self.title.encode("utf8"))
 
 class Chapter(Section):
-    def __init__(self, pagenr=u"", title=u"", number=u"", children=[]):
+    def __init__(self, pagenr="", title="", number="", children=[]):
         super(Chapter, self).__init__(pagenr=pagenr, title=title, number=number, children=children)
 
 
@@ -317,7 +317,7 @@ class Document(Section):
 #        pass
 
 class Meta(object):
-    def __init__(self, title=u"", authors=None, language=u""):
+    def __init__(self, title="", authors=None, language=""):
         super(Meta, self).__init__()
         self.title = title
         if authors == None or type(authors) != list:
@@ -365,13 +365,13 @@ class DocumentChecker(object):
         return doc
 
     def _only_keep_real_sections(self, doc):
-        last_nr = u""
+        last_nr = ""
         last_node = None
         mark_for_rm = list()
         for c in doc.children():
             if type(c) == Section:
                 to_compare = c.number
-                if to_compare is u"":
+                if to_compare is "":
                     to_compare = c.title
                 if last_nr > to_compare:
                     if last_node:
@@ -386,16 +386,16 @@ class DocumentChecker(object):
 
 
 if __name__ == '__main__':
-    print u"Test for " + __file__
+    print("Test for " + __file__)
 
-    print u"  Building test document..."
+    print("  Building test document...")
     doc = Document()
-    sec1 = Section(title=u"1. Foo")
-    sec11 = Section(title=u"1.1 Bar")
-    sec12 = Section(title=u"1.2 Baz")
-    sec2 = Section(title=u"2. Raboof")
-    para0 = Paragraph(text=u"Intro text")
-    para1 = Paragraph(text=u"""\
+    sec1 = Section(title="1. Foo")
+    sec11 = Section(title="1.1 Bar")
+    sec12 = Section(title="1.2 Baz")
+    sec2 = Section(title="2. Raboof")
+    para0 = Paragraph(text="Intro text")
+    para1 = Paragraph(text="""\
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. In lacinia nec massa id interdum. Ut dolor mauris, mollis quis sagittis at, viverra ac mauris. Phasellus pharetra dolor neque, sit amet ultricies nibh imperdiet lobortis. Fusce ac blandit ex, eu feugiat eros. Etiam nec erat enim. Fusce at metus ac dui sagittis laoreet. Nulla suscipit nisl ut lacus viverra, a vestibulum est lacinia. Aliquam finibus urna nunc, nec venenatis mi dictum eget. Etiam vitae ante quis neque aliquam vulputate id sit amet massa. Pellentesque elementum sapien non mauris laoreet cursus. Pellentesque at mauris id ipsum viverra egestas. Sed nec volutpat metus, vel sollicitudin ante. Pellentesque interdum justo vel ullamcorper dictum. Phasellus volutpat nibh eget arcu venenatis, a bibendum lorem mattis. Quisque in laoreet leo.""")
     sec11.add_child(para1)
     sec1.add_child(sec11)
@@ -404,21 +404,21 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. In lacinia nec massa id
     doc.add_child(sec1)
     doc.add_child(sec2)
 
-    print u"  Testing document hierarchy..."
+    print("  Testing document hierarchy...")
     assert len(doc.children()) == 3
     assert len(doc.sections()) == 2
     assert len(doc.paragraphs()) == 2
     assert len(doc.paragraphs(recursive=False)) == 1
     assert len(doc.floats()) == 0
 
-    print u"  Testing document text methods..."
+    print("  Testing document text methods...")
     assert len(doc.words()) == 150
     assert len(doc.raw()) == 827
 
-    print u"  Testing DocumentChecker..."
+    print("  Testing DocumentChecker...")
     doc_checker = DocumentChecker()
     doc = doc_checker.cleanup(doc)
     assert len(doc.words()) == 148
     assert len(doc.raw()) == 816
 
-    print u"Passed all tests!"
+    print("Passed all tests!")

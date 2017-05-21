@@ -12,7 +12,7 @@ Description:
 '''
 
 import os.path as op
-from cPickle import dump, load
+from pickle import dump, load
 from lxml import etree
 
 import nltk
@@ -23,34 +23,34 @@ from nltk.tokenize.punkt import PunktTrainer, PunktSentenceTokenizer
 
 from confopy.analysis.corpus import Corpus
 import confopy.config as C
-from fillers_de import FILLERS_DE
+from .fillers_de import FILLERS_DE
 
 class _Terminal(object):
     """docstring for _Terminal"""
     def __init__(self, t_node):
         super(_Terminal, self).__init__()
-        self.ID     = unicode(t_node.get(u"id")    )
-        self.word   = unicode(t_node.get(u"word")  )
-        self.lemma  = unicode(t_node.get(u"lemma") )
-        self.pos    = unicode(t_node.get(u"pos")   )
-        self.morph  = unicode(t_node.get(u"morph") )
-        self.case   = unicode(t_node.get(u"case")  )
-        self.number = unicode(t_node.get(u"number"))
-        self.gender = unicode(t_node.get(u"gender"))
-        self.person = unicode(t_node.get(u"person"))
+        self.ID     = str(t_node.get("id")    )
+        self.word   = str(t_node.get("word")  )
+        self.lemma  = str(t_node.get("lemma") )
+        self.pos    = str(t_node.get("pos")   )
+        self.morph  = str(t_node.get("morph") )
+        self.case   = str(t_node.get("case")  )
+        self.number = str(t_node.get("number"))
+        self.gender = str(t_node.get("gender"))
+        self.person = str(t_node.get("person"))
         #self.degree = unicode(t_node.get(u"degree"))
-        self.tense  = unicode(t_node.get(u"tense") )
-        self.mood   = unicode(t_node.get(u"mood")  )
+        self.tense  = str(t_node.get("tense") )
+        self.mood   = str(t_node.get("mood")  )
 
 class _NonTerminal(object):
     """docstring for _NonTerminal"""
     def __init__(self, nt_node):
         super(_NonTerminal, self).__init__()
-        self.ID  = unicode(nt_node.get(u"id") )
-        self.cat = unicode(nt_node.get(u"cat"))
+        self.ID  = str(nt_node.get("id") )
+        self.cat = str(nt_node.get("cat"))
         self.edges = list()
-        for e in nt_node.iter(u"edge"):
-            self.edges.append((unicode(e.get(u"label")), unicode(e.get(u"idref"))))
+        for e in nt_node.iter("edge"):
+            self.edges.append((str(e.get("label")), str(e.get("idref"))))
 
 
 
@@ -60,16 +60,16 @@ class _TigerSentence(object):
     """
     def __init__(self, sent_node):
         super(_TigerSentence, self).__init__()
-        self.ID = sent_node.get(u"id")
+        self.ID = sent_node.get("id")
         self.terminals = list()
         term_ids = set()
-        for term in sent_node.iter(u"t"):
+        for term in sent_node.iter("t"):
             _term = _Terminal(term)
             self.terminals.append(_term)
             term_ids.add(_term.ID)
         self.non_terminals = list()
         self.edges = dict()
-        for nonterm in sent_node.iter(u"nt"):
+        for nonterm in sent_node.iter("nt"):
             _nt = _NonTerminal(nonterm)
             for e in _nt.edges:
                 if e[1] in term_ids:
@@ -85,10 +85,10 @@ class _TigerSentence(object):
     def tagged_words(self, include_edgelabels=True):
         buf = list()
         for term in self.terminals:
-            elabel = self.edges.get(term.ID, u"")
+            elabel = self.edges.get(term.ID, "")
             tag = term.pos
-            if include_edgelabels and elabel not in [u"", u"--"]:
-                tag = u"%s-%s" % (tag, elabel)
+            if include_edgelabels and elabel not in ["", "--"]:
+                tag = "%s-%s" % (tag, elabel)
             buf.append((term.word, tag))
         return buf
 
@@ -99,16 +99,16 @@ class _TigerSentence(object):
             nodes[t.ID] = t
         for nt in self.non_terminals:
             nodes[nt.ID] = nt
-            if nt.cat == u"VROOT":
+            if nt.cat == "VROOT":
                 vroot = nt
         if vroot is not None:
             return self._conv_etree2tree(vroot, nodes, include_edgelabels=include_edgelabels)
-        return nltk.Tree(u"", [])
+        return nltk.Tree("", [])
 
-    def _conv_etree2tree(self, node, nodes, label=u"", include_edgelabels=True):
+    def _conv_etree2tree(self, node, nodes, label="", include_edgelabels=True):
         if type(node) == _Terminal:
             pos = node.pos
-            if include_edgelabels and label not in [u"", u"--"]:
+            if include_edgelabels and label not in ["", "--"]:
                 pos = pos + "-" + label
             return nltk.Tree(pos, [node.word])
         elif type(node) == _NonTerminal:
@@ -150,20 +150,20 @@ class TigerCorpusReader(Corpus):
     """
 
     STORAGE_ROOT = op.dirname(op.realpath(__file__))
-    CORPUS_FILE = u"_tiger_corpus.pkl"
-    TAGGER_FILE = u"_tiger_tagger.pkl"
+    CORPUS_FILE = "_tiger_corpus.pkl"
+    TAGGER_FILE = "_tiger_tagger.pkl"
 
-    SENTS_FILE_SUFFIX = u"_sents.pkl"
-    PCFG_FILE_SUFFIX  = u"_pcfg.pkl"
-    PCFG_PARSER_FILE_SUFFIX = u"_pcfg_parser.pkl"
-    SENT_TOKENIZER_FILE_SUFFIX = u"_sent_tkzr.pkl"
+    SENTS_FILE_SUFFIX = "_sents.pkl"
+    PCFG_FILE_SUFFIX  = "_pcfg.pkl"
+    PCFG_PARSER_FILE_SUFFIX = "_pcfg_parser.pkl"
+    SENT_TOKENIZER_FILE_SUFFIX = "_sent_tkzr.pkl"
 
-    GRAMMAR_START = u"VROOT"
-    FEATURE_SEP = u"-"
-    NO_VALUE = u"_"
+    GRAMMAR_START = "VROOT"
+    FEATURE_SEP = "-"
+    NO_VALUE = "_"
 
     def __init__(self, tigerfile=None, cache=False):
-        super(TigerCorpusReader, self).__init__(ID=u"TIGER", language=u"de", brief=u"TIGER Treebank v2.2", description=u"TIGER deutscher Corpus")
+        super(TigerCorpusReader, self).__init__(ID="TIGER", language="de", brief="TIGER Treebank v2.2", description="TIGER deutscher Corpus")
         self._tagger = None
         self._pcfg = None
         self._pcfg_parser = None
@@ -171,7 +171,7 @@ class TigerCorpusReader(Corpus):
         self._tigerfile = tigerfile
         if self._tigerfile is None:
             #self._tigerfile = TigerCorpusReader.STORAGE_ROOT + u"/tiger_corpus/tiger_release_aug07.corrected.16012013_utf8_patched_half.xml"
-            self._tigerfile = TigerCorpusReader.STORAGE_ROOT + u"/" + C.CORPUS_FILES.get(u"de", u"")
+            self._tigerfile = TigerCorpusReader.STORAGE_ROOT + "/" + C.CORPUS_FILES.get("de", "")
         self.tiger_sents = None
         if cache:
             try:
@@ -181,7 +181,7 @@ class TigerCorpusReader(Corpus):
                 self.tiger_sents = None
         if self.tiger_sents is None:
             try:
-                context = etree.iterparse(self._tigerfile, events=("end",), tag=u"s", encoding=u"utf-8")
+                context = etree.iterparse(self._tigerfile, events=("end",), tag="s", encoding="utf-8")
                 self.tiger_sents = self._fast_iter(context, self._sent_func)
                 if cache:
                     try:
@@ -189,11 +189,11 @@ class TigerCorpusReader(Corpus):
                             dump(self.tiger_sents, f, -1)
                     except IOError:
                         self.tiger_sents = []
-                        print u"Could not cache TIGER sentences to %s%s" % (self._tigerfile, TigerCorpusReader.SENTS_FILE_SUFFIX)
+                        print("Could not cache TIGER sentences to %s%s" % (self._tigerfile, TigerCorpusReader.SENTS_FILE_SUFFIX))
             except IOError:
-                print u"Error: TIGER corpus file not found. Please follow README to download and place it properly."
-                print u"       (A file named " + C.CORPUS_FILES.get(u"de", u"")
-                print u"        needs to be placed here: " + TigerCorpusReader.STORAGE_ROOT + u")"
+                print("Error: TIGER corpus file not found. Please follow README to download and place it properly.")
+                print("       (A file named " + C.CORPUS_FILES.get("de", ""))
+                print("        needs to be placed here: " + TigerCorpusReader.STORAGE_ROOT + ")")
                 import sys
                 sys.exit(1)
 
@@ -241,10 +241,10 @@ class TigerCorpusReader(Corpus):
         return [self.parsed_sents(include_edgelabels)]
 
     def xml(self):
-        return u""
+        return ""
 
     def raw(self):
-        return u""
+        return ""
 
     def tagger(self, include_edgelabels=True):
         """Creates a tagger from the TIGER Corpus.
@@ -263,7 +263,7 @@ class TigerCorpusReader(Corpus):
             bigram_tagger = nltk.BigramTagger(tagged_sents, backoff=unigram_tagger)
             return bigram_tagger
 
-        self._tagger = _cached(self._tagger, TigerCorpusReader.STORAGE_ROOT + u"/" + TigerCorpusReader.TAGGER_FILE, constructor)
+        self._tagger = _cached(self._tagger, TigerCorpusReader.STORAGE_ROOT + "/" + TigerCorpusReader.TAGGER_FILE, constructor)
         return self._tagger
 
     def pcfg(self, include_edgelabels=True):
@@ -288,7 +288,7 @@ class TigerCorpusReader(Corpus):
         def constructor():
             return self.pcfg(include_edgelabels)
 
-        self._pcfg = _cached(self._pcfg, TigerCorpusReader.STORAGE_ROOT + u"/" + TigerCorpusReader.PCFG_FILE_SUFFIX, constructor)
+        self._pcfg = _cached(self._pcfg, TigerCorpusReader.STORAGE_ROOT + "/" + TigerCorpusReader.PCFG_FILE_SUFFIX, constructor)
         self._pcfg_parser = nltk.ViterbiParser(self._pcfg)
         return self._pcfg_parser
 
@@ -304,7 +304,7 @@ class TigerCorpusReader(Corpus):
             params = trainer.get_params()
             return PunktSentenceTokenizer(params)
 
-        self._sent_tokenizer = _cached(self._sent_tokenizer, TigerCorpusReader.STORAGE_ROOT + u"/" + TigerCorpusReader.SENT_TOKENIZER_FILE_SUFFIX, constructor)
+        self._sent_tokenizer = _cached(self._sent_tokenizer, TigerCorpusReader.STORAGE_ROOT + "/" + TigerCorpusReader.SENT_TOKENIZER_FILE_SUFFIX, constructor)
         return self._sent_tokenizer
 
     def fillers(self):
@@ -312,21 +312,21 @@ class TigerCorpusReader(Corpus):
 
 
 
-CORPUS_PATH = TigerCorpusReader.STORAGE_ROOT + u"/" + TigerCorpusReader.CORPUS_FILE
+CORPUS_PATH = TigerCorpusReader.STORAGE_ROOT + "/" + TigerCorpusReader.CORPUS_FILE
 def test_parse():
-    print u"%s: Parse test" % (__file__, )
-    print u"Using TIGER corpus to parse a sentence."
+    print("%s: Parse test" % (__file__, ))
+    print("Using TIGER corpus to parse a sentence.")
     tiger_corpus = _cached(None, CORPUS_PATH, TigerCorpusReader)
 
     sents = tiger_corpus.parsed_sents()
-    print unicode(sents[3])
+    print(str(sents[3]))
     #sents[3].draw()
 
-    text = nltk.word_tokenize(u"Der Hase springt über den Baum, der sehr hoch gewachsen ist.")
+    text = nltk.word_tokenize("Der Hase springt über den Baum, der sehr hoch gewachsen ist.")
     tiger_tagger = tiger_corpus.tagger()
     tagged_text = tiger_tagger.tag(text)
-    tagged_text_ref = [(u'Der', u'ART-NK'), (u'Hase', u'NN-NK'), (u'springt', u'VVFIN-HD'), (u'\xfcber', u'APPR-AC'), (u'den', u'ART-NK'), (u'Baum', u'NN-NK'), (u',', u'$,'), (u'der', u'PRELS-SB'), (u'sehr', u'ADV-MO'), (u'hoch', u'ADJD-HD'), (u'gewachsen', u'VVPP-HD'), (u'ist', u'VAFIN-HD'), (u'.', u'$.')]
-    print tagged_text
+    tagged_text_ref = [('Der', 'ART-NK'), ('Hase', 'NN-NK'), ('springt', 'VVFIN-HD'), ('\xfcber', 'APPR-AC'), ('den', 'ART-NK'), ('Baum', 'NN-NK'), (',', '$,'), ('der', 'PRELS-SB'), ('sehr', 'ADV-MO'), ('hoch', 'ADJD-HD'), ('gewachsen', 'VVPP-HD'), ('ist', 'VAFIN-HD'), ('.', '$.')]
+    print(tagged_text)
     assert tagged_text == tagged_text_ref
 
 
@@ -340,26 +340,26 @@ def test_grammar_parse():
 
         http://stackoverflow.com/questions/7056996/how-do-i-get-a-set-of-grammar-rules-from-penn-treebank-using-python-nltk
     """
-    print u"%s: Grammar test" % (__file__, )
-    print u"Deriving grammar from parsed TIGER corpus sentences"
+    print("%s: Grammar test" % (__file__, ))
+    print("Deriving grammar from parsed TIGER corpus sentences")
     #tiger_corpus = TigerCorpusReader()
     tiger_corpus = _cached(None, CORPUS_PATH, TigerCorpusReader)
     grammar_parser = tiger_corpus.viterbi_parser(False)
     grammar_parser.trace()
 
-    text = nltk.word_tokenize(u"Der Hase springt über den Baum, der sehr hoch gewachsen ist.")
+    text = nltk.word_tokenize("Der Hase springt über den Baum, der sehr hoch gewachsen ist.")
     #text = nltk.word_tokenize(u"Der kleine gelbe Hund beobachtete die Katze.")
-    text = nltk.word_tokenize(u"Der kleine Hund blickte zu der Katze.")
-    print u"Parsing unknown text"
+    text = nltk.word_tokenize("Der kleine Hund blickte zu der Katze.")
+    print("Parsing unknown text")
     try:
         tree = grammar_parser.parse(text)
         if tree:
             tree.draw()
-        print u"Printing parse tree for text..."
-        print unicode(tree)
+        print("Printing parse tree for text...")
+        print(str(tree))
     except ValueError as e:
-        print u"Input contains words not known by grammar!"
-        print u"%s" % e
+        print("Input contains words not known by grammar!")
+        print("%s" % e)
 
 if __name__ == '__main__':
     test_parse()

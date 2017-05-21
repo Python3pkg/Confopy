@@ -8,10 +8,11 @@ import operator
 import unicodedata
 
 from confopy.pdfextract import xml_util
+from functools import reduce
 
 # Constants
 
-SVG_HEADER = u"""<?xml version="1.0" standalone="no"?>
+SVG_HEADER = """<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
@@ -31,7 +32,7 @@ ellipse, rect {
 </style>
 """
 
-SVG_FOOTER = u"""</svg>
+SVG_FOOTER = """</svg>
 """
 
 SVG_TOP_PADDING = 16
@@ -56,7 +57,7 @@ class Box(object):
     def as_svg(self):
         return bbox2svg(self.bbox)
 
-    def _print(self, pad=u""):
+    def _print(self, pad=""):
         pass
 
 #    def as_textboxes(self):
@@ -86,31 +87,31 @@ class TextBox(Box):
         self.lines = lines
         self.line_count = len(lines)
         self.font = font
-        self.word_count = reduce(operator.add, map(lambda line: len(line.split()), lines), 0)
-        self.character_count = reduce(operator.add, map(lambda line: len(line), lines), 0)
+        self.word_count = reduce(operator.add, [len(line.split()) for line in lines], 0)
+        self.character_count = reduce(operator.add, [len(line) for line in lines], 0)
         self.emph = emph
 
 #    def as_lines(self):
 #        return self.lines
 
-    def _print(self, pad=u""):
+    def _print(self, pad=""):
         if self.lines == []:
-            print(pad + u"<TextBox ID=%s>" % (self.ID))
+            print((pad + "<TextBox ID=%s>" % (self.ID)))
         else:
-            print(pad + u"<TextBox ID=%s #w=%s %s>" % (self.ID, self.word_count, self.font))
+            print((pad + "<TextBox ID=%s #w=%s %s>" % (self.ID, self.word_count, self.font)))
             for line in self.lines:
-                print(pad + u"  " + line)
+                print((pad + "  " + line))
                 #for c in line:
                 #    print repr(c)
             if len(self.emph) > 0:
-                print(pad + u"  <emph=[" + reduce(lambda a,b: a+u", "+b, self.emph) + "]>")
+                print((pad + "  <emph=[" + reduce(lambda a,b: a+", "+b, self.emph) + "]>"))
 
     def __unicode__(self):
         if self.lines == []:
-            return u"## Empty (Layout-)Textbox " + self.ID
+            return "## Empty (Layout-)Textbox " + self.ID
         if self.ID != "":
-            return u"## Textbox " + self.ID + u" (%s words, %s, %s) ##\n" % (self.word_count, self.font, self.fontsize) + u"\n".join(self.lines)
-        return u"## Textbox (%s words, %s, %s) ##\n" % (self.word_count, self.font, self.fontsize) + u"\n".join(self.lines)
+            return "## Textbox " + self.ID + " (%s words, %s, %s) ##\n" % (self.word_count, self.font, self.fontsize) + "\n".join(self.lines)
+        return "## Textbox (%s words, %s, %s) ##\n" % (self.word_count, self.font, self.fontsize) + "\n".join(self.lines)
         #return "\n".join(unicodedata.normalize("NFKD", l) \
         #                 .encode("latin1", "replace") for l in self.lines)
 
@@ -144,14 +145,14 @@ class Page(Box):
             self._textboxes_by_ID[tb.ID] = tb
         self.layout = layout
         self.prim_font = find_primary_font(textboxes=textboxes)
-        self.word_count = reduce(operator.add, map(lambda tb: tb.word_count, textboxes), 0)
+        self.word_count = reduce(operator.add, [tb.word_count for tb in textboxes], 0)
         #print unicode(self).encode("utf-8")
 
     def get_textbox(self, tbID):
         try:
             return self._textboxes_by_ID[tbID]
         except KeyError:
-            print u"Page %s does not contain textbox with ID %s" % (self.ID, tbID)
+            print("Page %s does not contain textbox with ID %s" % (self.ID, tbID))
             return None
 
     def get_siblings(self, tb):
@@ -219,22 +220,22 @@ class Page(Box):
 #    def as_textboxes(self):
 #        return self.textboxes
 
-    def _print(self, pad=u""):
-        print(pad + u"<Page ID=%s #w=%s prim_font=%s>" % (self.ID, self.word_count, self.prim_font))
+    def _print(self, pad=""):
+        print((pad + "<Page ID=%s #w=%s prim_font=%s>" % (self.ID, self.word_count, self.prim_font)))
         for tb in self.textboxes:
-            tb._print(pad + u"  ")
+            tb._print(pad + "  ")
         if self.layout:
-            self.layout._print(pad + u"  ")
+            self.layout._print(pad + "  ")
 
 
     def __unicode__(self):
         buf = list()
-        buf.append((u"# Page %s (%s words, %s, %s)#" % (self.ID, self.word_count, self.font, self.fontsize)))
+        buf.append(("# Page %s (%s words, %s, %s)#" % (self.ID, self.word_count, self.font, self.fontsize)))
         for tb in self.textboxes:
-            tb_str = unicode(tb)
-            if tb_str != u"":
+            tb_str = str(tb)
+            if tb_str != "":
                 buf.append(tb_str)
-                return u"\n".join(buf)
+                return "\n".join(buf)
 
     def __repr__(self):
         return "Page(super=%r,ID=%r,textboxes=%r,textgroups=%r)" \
@@ -262,10 +263,10 @@ class TextGroup(Box):
         rnd_color = int(999999.0 * rnd)
         return bbox2svg(self.bbox, rnd_color)
 
-    def _print(self, pad=u""):
-        print(pad + u"<TextGroup>")
+    def _print(self, pad=""):
+        print((pad + "<TextGroup>"))
         for c in self.children:
-            c._print(pad + u"  ")
+            c._print(pad + "  ")
 
     def __repr__(self):
         return "TextGroup(super=%r,children=%r)" \
@@ -282,7 +283,7 @@ def DOM2pages(dom_document):
     dom_pages = dom_document.getElementsByTagName("page")
     # Forget about multiprocessing here.
     # DOM objects seems to have some side effects not allowing this.
-    return map(DOM2page, dom_pages)
+    return list(map(DOM2page, dom_pages))
 
 
 def str2bbox(bbstr):
@@ -323,72 +324,72 @@ def DOM2textline(dom_textline):
     letters = list()
     fonts = list()
     sizes = list()
-    font = u""
-    size = u""
+    font = ""
+    size = ""
     next_letter_uml = False
     for dom_letter in dom_letters:
-        letter = u""
+        letter = ""
         if dom_letter.firstChild:
             letter = dom_letter.firstChild.nodeValue
 
         if dom_letter.hasAttributes() or letter.strip() != "":
-            font = unicode(dom_letter.getAttribute("font"))
-            size = unicode(dom_letter.getAttribute("size"))
+            font = str(dom_letter.getAttribute("font"))
+            size = str(dom_letter.getAttribute("size"))
             #if re.match(PDFMINER_CID, letter):
             #    print "FOUND CID: %s" % letter
             letter = _escape_pdfminer_cid(letter)
-            if letter == u"(cid:127)":
+            if letter == "(cid:127)":
                 next_letter_uml = True
             else:
                 if next_letter_uml:
                     letter = _convert2uml(letter)
                     next_letter_uml = False
                 for c in letter:
-                    letters.append(unicode(c))
+                    letters.append(str(c))
                     fonts.append(font)
                     sizes.append(size)
         else:
-            letters.append(u" ")
+            letters.append(" ")
             fonts.append(font)
             sizes.append(size)
-    line = u"".join(letters)
+    line = "".join(letters)
     #emph = find_emphasis(line, fonts, sizes)
     return (line, fonts, sizes)
 
 _CID_MAP = { \
-      u"(cid:12)": u"fi" \
-    , u"(cid:13)": u"fl" \
-    , u"(cid:25)": u"ß"  \
+      "(cid:12)": "fi" \
+    , "(cid:13)": "fl" \
+    , "(cid:25)": "ß"  \
 }
 def _escape_pdfminer_cid(letter):
     return _CID_MAP.get(letter, letter)
 
 def _convert2uml(letter):
-    if letter == u"a":
-        return u"ä"
-    elif letter == u"o":
-        return u"ö"
-    elif letter == u"u":
-        return u"ü"
+    if letter == "a":
+        return "ä"
+    elif letter == "o":
+        return "ö"
+    elif letter == "u":
+        return "ü"
     return letter
 
 def DOM2textbox(dom_textbox):
-    ID = unicode(dom_textbox.getAttribute("id"))
+    ID = str(dom_textbox.getAttribute("id"))
     bbox = str2bbox(dom_textbox.getAttribute("bbox"))
     dom_lines = dom_textbox.getElementsByTagName("textline")
-    lines_fonts_sizes = map(DOM2textline, dom_lines)
-    lines = map(lambda t: t[0], lines_fonts_sizes)
-    fonts = map(lambda t: t[1], lines_fonts_sizes)
-    sizes = map(lambda t: t[2], lines_fonts_sizes)
+    lines_fonts_sizes = list(map(DOM2textline, dom_lines))
+    lines = [t[0] for t in lines_fonts_sizes]
+    fonts = [t[1] for t in lines_fonts_sizes]
+    sizes = [t[2] for t in lines_fonts_sizes]
     def join_str(a, b):
-        return a + u"\n" + b
+        return a + "\n" + b
     def join_lst(a, b):
-        return a + [u"\n"] + b
-    all_lines = reduce(join_str, lines, u"")
+        return a + ["\n"] + b
+    all_lines = reduce(join_str, lines, "")
     all_fonts = reduce(join_lst, fonts, [])
     all_sizes = reduce(join_lst, sizes, [])
     (primary_font, primary_size, emph) = find_emphasis(all_lines, all_fonts, all_sizes)
-    lines = filter(lambda l: l.strip() != u"", lines)
+    lines = [l for l in lines if l.strip() != ""]
     lines = fix_separated_words(lines)
     return TextBox(ID, bbox, lines, (primary_font, primary_size), emph)
 
@@ -423,19 +424,19 @@ def emph_words(line, attributes):
     if len(unique_attrs) == 1:
         primary_attr = unique_attrs[0]
     elif len(unique_attrs) > 1:
-        occurrences = map(lambda f: attributes.count(f), unique_attrs)
+        occurrences = [attributes.count(f) for f in unique_attrs]
         primary_attr = unique_attrs[occurrences.index(max(occurrences))]
         unique_attrs.remove(primary_attr)
         for attr in unique_attrs:
             buf = list()
             for i in range(0, len(line)):
                 char = line[i]
-                if char.strip() == u"":
-                    buf.append(u" ")
+                if char.strip() == "":
+                    buf.append(" ")
                 elif attributes[i] == attr:
                     buf.append(char)
-            emph_ws = u"".join(buf)
-            emph = emph + filter(lambda w: w != u"", emph_ws.split(u" "))
+            emph_ws = "".join(buf)
+            emph = emph + [w for w in emph_ws.split(" ") if w != ""]
 
     return (primary_attr, emph)
 
@@ -452,10 +453,10 @@ def fix_separated_words(lines):
             l = new_lines[i]
             new_lines.pop()
             take_from_new_lines = False
-        if l.endswith(u"-"):
+        if l.endswith("-"):
             if i + 1 < len(lines):
                 next_l = lines[i + 1].strip()
-                if next_l is not u"":
+                if next_l is not "":
                     next_l_words = next_l.split()
                     if len(next_l_words) > 0:
                         if next_l[0].islower():
@@ -463,7 +464,7 @@ def fix_separated_words(lines):
                         else:
                             l = l + next_l_words[0]
                         new_lines.append(l)
-                        l = u" ".join(next_l_words[1:])
+                        l = " ".join(next_l_words[1:])
                         take_from_new_lines = True
                         new_lines.append(l)
         else:
@@ -474,26 +475,26 @@ def fix_separated_words(lines):
 
 def DOM2textgroup(dom_textgroup):
     bbox = str2bbox(dom_textgroup.getAttribute("bbox"))
-    textboxes = map( DOM2textbox
-                   , xml_util.getChildElementsByTagName(dom_textgroup, "textbox"))
-    children = map( DOM2textgroup
-                  , xml_util.getChildElementsByTagName(dom_textgroup, "textgroup"))
+    textboxes = list(map( DOM2textbox
+                   , xml_util.getChildElementsByTagName(dom_textgroup, "textbox")))
+    children = list(map( DOM2textgroup
+                  , xml_util.getChildElementsByTagName(dom_textgroup, "textgroup")))
     return TextGroup(bbox, textboxes + children)
 
 
 def DOM2page(dom_page):
-    page_id = unicode(dom_page.getAttribute("id"))
+    page_id = str(dom_page.getAttribute("id"))
     page_bbox = str2bbox(dom_page.getAttribute("bbox"))
 
     #dom_textboxes = dom_page.getElementsByTagName("textbox")
     dom_textboxes = xml_util.getChildElementsByTagName(dom_page, "textbox")
-    textboxes = map(DOM2textbox, dom_textboxes)
+    textboxes = list(map(DOM2textbox, dom_textboxes))
 
     dom_layout = dom_page.getElementsByTagName("layout")
     layout = None
     if len(dom_layout):
         dom_textgroups = xml_util.getChildElementsByTagName(dom_layout[0], "textgroup")
-        textgroups = map(DOM2textgroup, dom_textgroups)
+        textgroups = list(map(DOM2textgroup, dom_textgroups))
         if len(textgroups):
             layout = textgroups[0]
 
@@ -519,7 +520,7 @@ def find_primary_font(textboxes=[], pages=[]):
     fonts = dict()
     for tb in textboxes:
         fonts[tb.font] = fonts.get(tb.font, 0) + tb.character_count
-    sorted_fonts = sorted(fonts.iteritems(), key=operator.itemgetter(1))
+    sorted_fonts = sorted(iter(fonts.items()), key=operator.itemgetter(1))
     if len(sorted_fonts) > 0:
         prim_font = sorted_fonts.pop()[0]
         return (prim_font[0], prim_font[1], fonts[prim_font])
@@ -529,13 +530,13 @@ def find_primary_font(textboxes=[], pages=[]):
     for page in pages:
         font_key = (page.prim_font[0], page.prim_font[1])
         fonts[font_key] = fonts.get(font_key, 0) + page.prim_font[2]
-    sorted_fonts = sorted(fonts.iteritems(), key=operator.itemgetter(1))
+    sorted_fonts = sorted(iter(fonts.items()), key=operator.itemgetter(1))
     if len(sorted_fonts) > 0:
         prim_font = sorted_fonts.pop()[0]
         return (prim_font[0], prim_font[1], fonts[prim_font])
 
     # Default
-    return (u"", u"", 0)
+    return ("", "", 0)
 
 
 """ TEST
@@ -552,11 +553,11 @@ if __name__ == '__main__':
     if len(args) > 0:
         pageNr = int(args[0])
         if pageNr >= 0 and pageNr < len(pages):
-            print pages[pageNr].as_svg()
+            print(pages[pageNr].as_svg())
 
     # Debug: print all pages as text
     for page in pages:
-        print unicode(page)
-        print ""
+        print(str(page))
+        print("")
 
 
